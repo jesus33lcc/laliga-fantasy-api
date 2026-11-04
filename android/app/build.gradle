@@ -14,8 +14,8 @@ android {
         // arrastrar compatibilidad con WebViews antiguos que no soportan ES6.
         minSdk 24
         targetSdk 34
-        versionCode 21
-        versionName "1.0.0"
+        versionCode 22
+        versionName "1.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
