@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LaLiga Fantasy Coconut</title>
+<meta name="description" content="LaLiga Fantasy Coconut: precios, cláusulas, alineación y análisis de rivales.">
+<!-- Igual que `--c-ground-deep` de tokens.css: es el color de la barra de estado y, si no
+     coincide, se ve una franja de otro tono encima de la cabecera. -->
+<meta name="theme-color" content="#0A0A13">
+<link rel="icon" type="image/png" sizes="32x32" href="/app/img/favicon-32.png">
+<link rel="apple-touch-icon" href="/app/img/favicon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sofia+Sans:wght@400;600;700;900&display=swap">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pitch.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="cabecera">
+    <div class="cabecera__barra">
+      <button class="cabecera__accion cabecera__accion--menu" id="abrir-menu" aria-label="Abrir menú"
+        aria-expanded="false" aria-controls="menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          width="22" height="22" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <h1 class="cabecera__titulo" id="titulo">COCONUT</h1>
+      <button class="cabecera__accion cabecera__accion--fin" id="recargar" aria-label="Recargar datos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+          <path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6"/></svg>
+      </button>
+    </div>
+    <nav class="subtabs" id="subtabs" role="tablist" aria-label="Secciones"></nav>
+  </header>
+
+  <main class="principal" id="contenido"></main>
+
+  <footer class="pie" id="pie"></footer>
+
+  <!-- La nav va DENTRO de `.app`: en pantallas anchas y en horizontal es una columna del
+       grid, y fuera no le aplicaría `grid-column` y taparía el contenido. En móvil
+       vertical es `fixed`, así que no depende del desplazamiento. -->
+  <nav class="nav" aria-label="Navegación principal">
+    <div class="nav__lista" id="nav"></div>
+  </nav>
+
+</div>
+
+<div class="menu" id="menu" hidden>
+  <div class="menu__velo" id="velo"></div>
+  <div class="menu__panel" role="dialog" aria-modal="true" aria-label="Menú">
+    <div class="menu__cabecera">
+      <span class="menu__marca">COCONUT <em id="menu-liga"></em></span>
+      <button class="menu__cerrar" id="cerrar-menu" aria-label="Cerrar menú">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div id="menu-cuerpo"></div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

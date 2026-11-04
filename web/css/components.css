@@ -1,0 +1,985 @@
+/* ============================================================================
+   components.css: piezas reutilizables. Cada bloque es independiente y se usa
+   igual en cualquier vista. Nombres BEM: .bloque__elemento--modificador.
+   ========================================================================== */
+
+/* Tarjeta */
+
+.tarjeta {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+.tarjeta__cabecera {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--c-line);
+  font-size: var(--t-base); font-weight: var(--w-bold);
+}
+.tarjeta__extra { margin-left: auto; }
+/* Un icono en la esquina de la tarjeta, a la altura del texto de al lado. */
+.tarjeta__icono { width: 1.1em; height: 1.1em; display: block; }
+.tarjeta__cuerpo { padding: var(--s-4); }
+.tarjeta__pie {
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--c-line);
+  font-size: var(--t-sm); color: var(--c-ink-2);
+}
+.tarjeta--centrada .tarjeta__cabecera { justify-content: center; }
+
+/* Botón */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  padding: var(--s-2) var(--s-4);
+  min-height: 38px;              /* se pulsa con el dedo, no con un ratón */
+  border-radius: var(--r-sm);
+  -webkit-tap-highlight-color: transparent;
+  font-size: var(--t-sm); font-weight: var(--w-bold);
+  background: var(--c-surface-2); color: var(--c-ink);
+  border: 1px solid var(--c-line);
+  white-space: nowrap;
+  transition: background var(--vel) var(--curva), border-color var(--vel) var(--curva);
+}
+.btn:hover { background: var(--c-surface-3); }
+.btn--accion { background: var(--c-accent); border-color: transparent; color: var(--c-on-accent); }
+.btn--accion:hover { background: var(--c-accent-press); }
+.btn--oro { background: var(--c-gold); border-color: transparent; color: var(--c-sobre-oro); }
+.btn--fantasma { background: transparent; }
+.btn--bloque { width: 100%; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+/* Chip de posición */
+
+.chip-pos {
+  display: inline-block; min-width: 34px; padding: 2px var(--s-2);
+  border-radius: var(--r-sm);
+  font-size: var(--t-xs); font-weight: var(--w-black); letter-spacing: .04em;
+  text-align: center; color: var(--c-sobre-claro);
+}
+.chip-pos--1 { background: var(--c-pos-1); }
+.chip-pos--2 { background: var(--c-pos-2); }
+.chip-pos--3 { background: var(--c-pos-3); }
+.chip-pos--4 { background: var(--c-pos-4); }
+.chip-pos--5 { background: var(--c-pos-5); }
+
+/* Etiqueta de estado */
+
+.etiqueta {
+  display: inline-flex; align-items: center; gap: var(--s-1);
+  padding: 2px var(--s-2); border-radius: var(--r-full);
+  font-size: var(--t-xs); font-weight: var(--w-med);
+  background: var(--c-surface-3); color: var(--c-ink-2);
+}
+.etiqueta--ok   { background: var(--c-ok-fondo); color: var(--c-ok); }
+.etiqueta--warn { background: var(--c-warn-fondo); color: var(--c-warn); }
+.etiqueta--crit { background: var(--c-crit-fondo); color: var(--c-crit); }
+.etiqueta--info { background: var(--c-info-fondo); color: var(--c-info); }
+.etiqueta--premium { background: var(--c-premium-fondo); color: var(--c-premium); }
+
+/* Fila de lista (plantilla, mercado, clasificación) */
+
+.fila {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--c-line-soft);
+}
+.fila:last-child { border-bottom: 0; }
+.fila--mia { background: var(--c-accent-tenue); box-shadow: inset 3px 0 0 var(--c-accent); }
+.fila__cuerpo { flex: 1; min-width: 0; }
+.fila__titulo { font-weight: var(--w-bold); }
+/* Icono dentro del título de una fila, a la altura del texto. */
+.fila__icono { width: 1em; height: 1em; vertical-align: -.1em; }
+.fila__sub { font-size: var(--t-sm); color: var(--c-ink-2); }
+.fila__fin { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+
+/* Retrato del jugador */
+
+.retrato {
+  width: 52px; height: 52px; flex: none;
+  border-radius: var(--r-md);
+  background: var(--c-surface-2) center/cover no-repeat;
+  object-fit: cover;
+}
+.retrato--sm { width: 38px; height: 38px; }
+.retrato--vacio { display: grid; place-items: center; color: var(--c-ink-3); font-size: var(--t-lg); }
+
+/* Marcador (PFSY grande, como en la app) */
+
+.marcador { display: flex; align-items: baseline; justify-content: flex-end; gap: var(--s-1); }
+.marcador__cifra { font-size: var(--t-lg); font-weight: var(--w-black); font-variant-numeric: tabular-nums; }
+.marcador__unidad { font-size: 10px; font-weight: var(--w-bold); color: var(--c-ink-2); }
+.marcador--ok   .marcador__cifra { color: var(--c-ok); }
+.marcador--crit .marcador__cifra { color: var(--c-crit); }
+
+/* Racha de jornadas (los cuadraditos con línea de color) */
+
+.racha { display: flex; gap: 3px; }
+.racha__casilla {
+  min-width: 22px; padding: 1px 3px 0;
+  background: var(--c-surface-3);
+  border-bottom: 2px solid var(--c-ink-3);
+  font-size: var(--t-xs); font-weight: var(--w-bold); text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.racha__casilla--alta  { border-bottom-color: var(--c-ok); }
+.racha__casilla--media { border-bottom-color: var(--c-gold); }
+.racha__casilla--baja  { border-bottom-color: var(--c-crit); }
+.racha__casilla--vacia { color: var(--c-ink-3); border-bottom-color: var(--c-line); }
+
+/* Cláusula (candado abierto/cerrado, como en la app) */
+
+.clausula { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--t-sm); font-weight: var(--w-med); }
+.clausula__icono { width: 14px; height: 14px; }
+.clausula--libre     { color: var(--c-ok); }
+.clausula--protegida { color: var(--c-crit); }
+.clausula--blindada  { color: var(--c-info); }
+
+/* Dinero */
+
+.dinero { display: inline-flex; align-items: center; gap: var(--s-1); font-variant-numeric: tabular-nums; }
+.dinero__moneda {
+  /* 16 px es el mínimo: por debajo el símbolo no se lee y queda un círculo dorado
+     sin sentido. */
+  width: 16px; height: 16px; flex: none; border-radius: var(--r-full);
+  background: var(--c-gold); color: var(--c-sobre-oro);
+  font-size: 11px; font-weight: var(--w-black);
+  display: grid; place-items: center;
+}
+
+/* Aviso: lo que pinta el radar */
+
+.aviso {
+  display: flex; align-items: center; gap: var(--s-3);
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-left: 4px solid var(--c-ink-3);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+}
+.aviso--crit { border-left-color: var(--c-crit); }
+.aviso--warn { border-left-color: var(--c-warn); }
+.aviso--info { border-left-color: var(--c-info); }
+.aviso--ok   { border-left-color: var(--c-ok); }
+.aviso__cuerpo { flex: 1; min-width: 0; }
+.aviso__titulo { font-weight: var(--w-bold); display: flex; align-items: center; gap: var(--s-2); }
+/* En `em` y no en píxeles: el icono acompaña al texto si el sistema agranda la letra. El
+   SVG va con `currentColor`, así que toma el color del tono del aviso sin más reglas. */
+.aviso__icono { width: 1.15em; height: 1.15em; flex: none; }
+.aviso__texto { font-size: var(--t-sm); color: var(--c-ink-2); }
+
+.aviso__mas > summary {
+  cursor: pointer; list-style: none;
+  margin-top: var(--s-1); padding: var(--s-1) 0;
+  font-size: var(--t-sm); font-weight: var(--w-med); color: var(--c-ink-2);
+}
+.aviso__mas > summary::-webkit-details-marker { display: none; }
+.aviso__mas > summary::before { content: "▸ "; }
+.aviso__mas[open] > summary::before { content: "▾ "; }
+.aviso__mas > summary:hover { color: var(--c-ink); }
+
+.aviso__lista {
+  margin-top: var(--s-1);
+  font-size: var(--t-sm); color: var(--c-ink-2);
+  display: flex; flex-direction: column; gap: var(--s-1);
+}
+.aviso__lista li { padding-left: var(--s-3); border-left: 2px solid var(--c-line); }
+
+/* Barra de medida */
+
+.barra { height: 5px; border-radius: var(--r-full); background: var(--c-surface-3); overflow: hidden; margin-top: var(--s-1); }
+.barra__relleno { height: 100%; background: var(--c-info); border-radius: inherit; }
+.barra__relleno--ok   { background: var(--c-ok); }
+.barra__relleno--warn { background: var(--c-warn); }
+.barra__relleno--crit { background: var(--c-crit); }
+
+/* Píldoras de jornada (J1 J2 J3) */
+
+.jornadas { display: flex; gap: var(--s-2); }
+.jornada-pill {
+  width: 46px; height: 46px; border-radius: 50%;
+  display: grid; place-items: center; align-content: center;
+  background: var(--c-surface-2); color: var(--c-ink-2);
+  font-size: var(--t-sm); font-weight: var(--w-bold); line-height: 1.1;
+}
+.jornada-pill[aria-selected="true"] { background: var(--c-ok); color: var(--c-sobre-ok); }
+.jornada-pill__pts { font-size: var(--t-xs); font-weight: var(--w-med); }
+
+/* Partido */
+
+.partido {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--c-line-soft);
+}
+.partido:last-child { border-bottom: 0; }
+.partido__local { text-align: right; justify-content: flex-end; }
+.partido__marcador { font-weight: var(--w-black); font-variant-numeric: tabular-nums; min-width: 54px; text-align: center; }
+.partido__estado { grid-column: 1 / -1; text-align: center; font-size: var(--t-xs); color: var(--c-ink-3); }
+.escudo { width: 22px; height: 22px; flex: none; object-fit: contain; }
+
+/* Endpoint (pestaña API) */
+
+.endpoint {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--c-line-soft);
+  font-size: var(--t-sm);
+}
+.endpoint:last-child { border-bottom: 0; }
+.endpoint__metodo {
+  flex: none; min-width: 52px; padding: 2px var(--s-2);
+  border-radius: var(--r-sm); text-align: center;
+  font-size: 10px; font-weight: var(--w-black); letter-spacing: .04em;
+  background: var(--c-surface-3); color: var(--c-ink-2);
+}
+.endpoint__metodo--get    { background: var(--c-info-fondo); color: var(--c-info); }
+.endpoint__metodo--post   { background: var(--c-ok-fondo); color: var(--c-ok); }
+.endpoint__metodo--put    { background: var(--c-warn-fondo); color: var(--c-warn); }
+.endpoint__metodo--delete { background: var(--c-crit-fondo); color: var(--c-crit); }
+.endpoint__ruta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--t-sm); word-break: break-all;
+}
+.endpoint__desc { font-size: var(--t-sm); color: var(--c-ink-2); }
+
+/* Diálogo de confirmación
+   Todo lo que mueve dinero pasa por aquí. La caja reserva alto para el contenido
+   que muestra siempre: importe, saldo antes y después, y el aviso propio de la
+   operación. */
+
+.modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: var(--s-3); }
+.modal__velo { position: absolute; inset: 0; background: var(--c-velo-denso); }
+
+.modal__caja {
+  position: relative; z-index: 1;
+  width: min(560px, 100%); max-height: 90dvh;
+  display: flex; flex-direction: column;
+  background: var(--c-surface); border: 1px solid var(--c-line);
+  border-radius: var(--r-lg); box-shadow: var(--sombra);
+  overflow: hidden;
+  animation: subir var(--vel) var(--curva);
+}
+@keyframes subir { from { transform: translateY(12px); opacity: 0; } }
+
+.modal__cabecera {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--c-line);
+  border-top: 3px solid var(--c-ink-3);
+}
+.modal__cabecera h2 { font-size: var(--t-md); flex: 1; }
+.modal__cabecera--alto  { border-top-color: var(--c-crit); }
+.modal__cabecera--medio { border-top-color: var(--c-warn); }
+.modal__cabecera--bajo  { border-top-color: var(--c-ok); }
+
+.modal__cuerpo {
+  padding: var(--s-4); overflow-y: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column; gap: var(--s-4);
+}
+.modal__sujeto { font-size: var(--t-lg); font-weight: var(--w-bold); }
+
+/* Panel de «Probar» un endpoint */
+
+/* Rótulo suelto dentro de una tarjeta. `.tarjeta` no pone padding (para que una tabla o
+   un campo puedan ir a sangre), así que todo lo que vaya directo dentro se lo pone él,
+   igual que hace `.fila`. Sin esto el texto sale pegado al borde. */
+.rotulo { padding: var(--s-3) var(--s-4) 0; }
+
+.sonda__meta {
+  margin: 0; color: var(--c-ink-2); font-size: var(--t-sm);
+  font-variant-numeric: tabular-nums;
+}
+.sonda__err { margin: 0; color: var(--c-crit); }
+/* El JSON se desplaza DENTRO de su caja (`overflow: auto`) y nunca estira la página:
+   una línea larga de la respuesta desbordaría la app entera a lo ancho. `min-width: 0`
+   es lo que impide que el hijo estire al padre, el fallo clásico de `min-width: auto`. */
+.sonda__json {
+  margin: 0; min-width: 0; max-height: 55vh; overflow: auto;
+  padding: var(--s-3); border-radius: var(--r-md);
+  background: var(--c-ground-deep); color: var(--c-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--t-xs); line-height: 1.5;
+  white-space: pre; tab-size: 2;
+}
+
+.modal__cuentas { display: flex; flex-direction: column; gap: var(--s-1); margin: 0; }
+.modal__cuentas > div { display: flex; align-items: baseline; gap: var(--s-3); }
+.modal__cuentas dt { color: var(--c-ink-2); font-size: var(--t-sm); }
+.modal__cuentas dd { margin: 0 0 0 auto; font-weight: var(--w-bold); }
+
+.modal__avisos { display: flex; flex-direction: column; gap: var(--s-1); }
+.modal__cuando { display: flex; flex-direction: column; gap: var(--s-2); }
+.modal__nota { font-size: var(--t-sm); color: var(--c-ink-2); }
+
+.horas { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.hora {
+  padding: var(--s-2) var(--s-3); min-height: 38px;
+  border: 1px solid var(--c-line); border-radius: var(--r-sm);
+  background: var(--c-surface-2); color: var(--c-ink-2);
+  font-size: var(--t-sm); font-weight: var(--w-bold); font-variant-numeric: tabular-nums;
+}
+.hora:hover { color: var(--c-ink); border-color: var(--c-ink-3); }
+.hora[aria-pressed="true"] { background: var(--c-info); border-color: transparent; color: var(--c-sobre-info); }
+.hora--ya[aria-pressed="true"] { background: var(--c-accent); color: var(--c-on-accent); }
+.hora small { font-weight: var(--w-normal); opacity: .7; }
+
+.modal__teclear { display: flex; flex-direction: column; gap: var(--s-2); }
+.campo-texto {
+  width: 100%; padding: var(--s-3); min-height: 44px;
+  background: var(--c-surface-2); color: var(--c-ink);
+  border: 1px solid var(--c-line); border-radius: var(--r-sm);
+  font-size: var(--t-md);
+}
+.campo-texto:focus-visible { outline: 2px solid var(--c-info); outline-offset: 1px; }
+
+/* Interruptores de aviso (como las notificaciones del móvil) */
+
+.avisos-lista { display: flex; flex-direction: column; }
+.opcion-aviso {
+  display: flex; align-items: center; gap: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--c-line-soft);
+  cursor: pointer;
+}
+.opcion-aviso:last-child { border-bottom: 0; }
+.opcion-aviso:hover { background: var(--c-surface-2); }
+.opcion-aviso__texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.opcion-aviso__titulo { font-weight: var(--w-bold); display: flex; align-items: center; gap: var(--s-2); }
+.opcion-aviso__detalle { font-size: var(--t-sm); color: var(--c-ink-2); }
+
+.interruptor {
+  appearance: none; flex: none;
+  width: 46px; height: 27px; border-radius: var(--r-full);
+  background: var(--c-surface-3); border: 1px solid var(--c-line);
+  position: relative; cursor: pointer;
+  transition: background var(--vel) var(--curva);
+}
+.interruptor::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 21px; height: 21px; border-radius: 50%;
+  background: var(--c-ink-2);
+  transition: transform var(--vel) var(--curva), background var(--vel) var(--curva);
+}
+.interruptor:checked { background: var(--c-ok); border-color: transparent; }
+.interruptor:checked::after { transform: translateX(19px); background: var(--c-ink); }
+.interruptor:focus-visible { outline: 2px solid var(--c-info); outline-offset: 2px; }
+
+.opciones { display: flex; flex-direction: column; gap: var(--s-2); }
+.opcion {
+  display: flex; flex-direction: column; gap: 2px; text-align: left;
+  padding: var(--s-3); min-height: 56px;
+  background: var(--c-surface-2); border: 1px solid var(--c-line); border-radius: var(--r-md);
+}
+.opcion:hover:not([disabled]) { border-color: var(--c-ink-3); background: var(--c-surface-3); }
+.opcion[disabled] { opacity: .5; cursor: not-allowed; }
+.opcion__titulo { font-weight: var(--w-bold); }
+.opcion__motivo { font-size: var(--t-sm); color: var(--c-ink-2); }
+
+.modal__crudo {
+  margin: 0; padding: var(--s-3); max-height: 200px; overflow: auto;
+  background: var(--c-ground-deep); border-radius: var(--r-sm);
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--c-ink-2); white-space: pre-wrap; word-break: break-all;
+}
+
+.modal__pie {
+  display: flex; gap: var(--s-2); justify-content: flex-end;
+  padding: var(--s-3) var(--s-4);
+  border-top: 1px solid var(--c-line);
+  background: var(--c-ground-deep);
+}
+@media (max-width: 480px) {
+  .modal { padding: 0; place-items: end stretch; }
+  .modal__caja { max-height: 94dvh; border-radius: var(--r-lg) var(--r-lg) 0 0; }
+  .modal__pie .btn { flex: 1; }
+}
+
+/* Estado vacío */
+
+.vacio { padding: var(--s-8) var(--s-4); text-align: center; color: var(--c-ink-2); }
+.vacio__icono { font-size: var(--t-2xl); opacity: .5; }
+
+/* Adaptación
+   Se compacta la densidad, nunca las funciones: el móvil es donde se opera, así
+   que ninguna acción desaparece al estrechar. En la fila el botón cabe porque
+   `.fila__fin` apila en columna bajo el marcador. */
+
+@media (max-width: 560px) {
+  .fila { gap: var(--s-2); padding: var(--s-3); }
+  .fila__sub { font-size: var(--t-xs); }
+  .fila .btn { padding: var(--s-1) var(--s-2); min-height: 32px; font-size: var(--t-xs); }
+  .retrato { width: 44px; height: 44px; }
+  .retrato--sm { width: 34px; height: 34px; }
+
+  .tarjeta__cabecera, .tarjeta__pie { padding-left: var(--s-3); padding-right: var(--s-3); }
+  .tarjeta__cuerpo { padding: var(--s-3); }
+
+  /* El aviso pasa a columna para que su acción quede a lo ancho, no apretada. */
+  .aviso { flex-direction: column; align-items: stretch; padding: var(--s-3); gap: var(--s-2); }
+  .aviso .btn { width: 100%; }
+
+  .endpoint { flex-wrap: wrap; padding: var(--s-3); }
+  .endpoint .btn { min-height: 34px; }
+  .partido { padding: var(--s-3); gap: var(--s-2); }
+  .jornada-pill { width: 42px; height: 42px; }
+  .marcador__cifra { font-size: var(--t-md); }
+}
+
+input[type="datetime-local"].campo-texto { color-scheme: dark; }
+
+/* Pantalla «Hoy»
+   Cada asunto es una tarjeta con una franja de color a la izquierda que
+   codifica la urgencia: se ve de un vistazo sin leer. */
+
+.asuntos { display: grid; gap: var(--s-2); }
+
+.asunto {
+  padding: var(--s-3) var(--s-4);
+  background: var(--c-surface-2); border: 1px solid var(--c-line);
+  border-left: 4px solid var(--c-line);
+}
+.asunto--crit  { border-left-color: var(--c-accent); }
+.asunto--alto  { border-left-color: var(--c-warn); }
+.asunto--medio { border-left-color: var(--c-info); }
+.asunto--bajo  { border-left-color: var(--c-line-soft); }
+
+/* Rejilla en vez de flex-wrap: el icono y el nivel ocupan la primera fila y el título
+   SIEMPRE empieza en la segunda. Con `flex-wrap` el salto depende de lo largo que sea
+   el nombre y cada tarjeta se alinea distinto. */
+.asunto__cab { display: grid; grid-template-columns: auto 1fr; align-items: center;
+               gap: 2px var(--s-2); }
+.asunto__icono { width: 16px; height: 16px; flex: none; color: currentColor; }
+.asunto--crit .asunto__icono { width: 16px; height: 16px; flex: none; color: currentColor; }
+.asunto__titulo { grid-column: 1 / -1; font-size: var(--t-md); font-weight: 700;
+                  margin: 0; text-wrap: balance; }
+.asunto__detalle { font-size: var(--t-sm); color: var(--c-ink-2); margin: var(--s-1) 0 0; }
+.asunto__accion {
+  font-size: var(--t-sm); font-weight: 600; margin: var(--s-2) 0 0;
+  padding-left: var(--s-3); border-left: 2px solid var(--c-line-soft);
+}
+/* Motor y Vigilancias
+   Una fila por trabajo. El punto de color codifica el estado para que se lea de
+   un vistazo, sin tener que interpretar el texto. */
+
+.trabajo {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; column-gap: var(--s-4);
+  padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-line);
+}
+/* Todo el texto va en la primera columna; la acción, en la segunda. */
+.trabajo > *:not(.trabajo__acc) { grid-column: 1; }
+.trabajo__acc { grid-column: 2; grid-row: 1 / -1; }
+.trabajo:last-child { border-bottom: 0; }
+.trabajo--mal { background: color-mix(in srgb, var(--c-crit) 6%, transparent); }
+
+.trabajo__cab { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.trabajo__punto {
+  width: 8px; height: 8px; flex: none; border-radius: 50%;
+  background: var(--c-ink-3);
+}
+.trabajo__punto.es-bien { background: var(--c-ok); }
+.trabajo__punto.es-mal  { background: var(--c-crit); }
+.trabajo__punto.es-vivo { background: var(--c-info); }
+.trabajo__nombre { font-size: var(--t-sm); }
+.trabajo__meta   { font-size: var(--t-xs); color: var(--c-ink-2);
+                   font-variant-numeric: tabular-nums; margin-left: auto; }
+.trabajo__desc   { font-size: var(--t-xs); color: var(--c-ink-2); margin: 2px 0 0; }
+.trabajo__detalle{ font-size: var(--t-xs); color: var(--c-ink-3); margin: var(--s-1) 0 0;
+                   overflow-wrap: anywhere; }
+.trabajo__hist   { list-style: none; margin: var(--s-2) 0 0; padding: 0 0 0 var(--s-3);
+                   border-left: 2px solid var(--c-line); }
+.trabajo__hist li{ font-size: var(--t-xs); color: var(--c-ink-2); padding: 1px 0; }
+.trabajo__hist span { color: var(--c-ink-3); font-variant-numeric: tabular-nums;
+                      margin-right: var(--s-2); }
+.trabajo__pie { margin-top: var(--s-2); font-size: var(--t-xs); color: var(--c-ink-2); }
+.es-mal-txt { color: var(--c-crit); }
+
+
+/* Ventanas de clausulazo
+   Una fila por objetivo. Los míos llevan barra al lado para distinguir de un
+   vistazo «a quién ataco» de «a quién me atacan». */
+
+.fila-vent { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-line); }
+.fila-vent:last-child { border-bottom: 0; }
+.fila-vent--mia { border-left: 3px solid var(--c-accent); }
+.fila-vent__ppal { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.fila-vent__nombre { font-size: var(--t-sm); }
+.fila-vent__eq { font-size: var(--t-xs); color: var(--c-ink-2); margin-left: auto; }
+.fila-vent__datos {
+  display: flex; gap: var(--s-3); margin-top: var(--s-1);
+  font-size: var(--t-xs); color: var(--c-ink-2); font-variant-numeric: tabular-nums;
+}
+.fila-vent__reloj { margin-left: auto; color: var(--c-warn); font-weight: var(--w-bold); }
+.fila-vent__nota { font-size: var(--t-xs); color: var(--c-ink-3); margin: var(--s-1) 0 0; }
+/* `flex-start` y no `flex-end`: en pantalla ancha, pegar el botón al borde deja un
+   vacío enorme en medio de la fila. */
+.fila-vent__pie { display: flex; justify-content: flex-start; margin-top: var(--s-2); }
+
+/* Ficha de jugador */
+
+.ficha__cab { display: flex; gap: var(--s-4); align-items: center; }
+.ficha__titulo { display: flex; align-items: center; gap: var(--s-2); }
+.ficha__titulo h2 { font-size: var(--t-lg); margin: 0; }
+.ficha__sub { font-size: var(--t-xs); color: var(--c-ink-2); margin: 2px 0 var(--s-1); }
+.ficha__datos {
+  padding: 0 var(--s-4) var(--s-4);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: var(--s-2); margin-top: var(--s-4);
+  border-top: 1px solid var(--c-line); padding-top: var(--s-3);
+}
+.ficha__datos div { display: flex; flex-direction: column; gap: 2px; }
+.ficha__datos span { font-size: 10px; text-transform: uppercase; letter-spacing: .06em;
+                     color: var(--c-ink-3); }
+.ficha__datos b { font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+.ficha__datos em { font-size: var(--t-xs); color: var(--c-ink-2); font-style: normal; }
+.es-sube { color: var(--c-ok); }
+.es-baja { color: var(--c-crit); }
+
+.chispa { width: 100%; height: 60px; display: block; }
+.chispa__pie { display: flex; justify-content: space-between; margin-top: var(--s-1);
+               font-size: var(--t-xs); color: var(--c-ink-3);
+               font-variant-numeric: tabular-nums; }
+
+.jorn { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-line); }
+.jorn:last-child { border-bottom: 0; }
+.jorn__cab { display: flex; align-items: center; gap: var(--s-2); }
+.jorn__pts { margin-left: auto; font-weight: var(--w-bold);
+             font-variant-numeric: tabular-nums; }
+.jorn__lista { list-style: none; margin: var(--s-2) 0 0; padding: 0; }
+.jorn__lista li { display: flex; align-items: baseline; gap: var(--s-2);
+                  font-size: var(--t-xs); padding: 2px 0; }
+.jorn__lista li span { color: var(--c-ink-2); }
+.jorn__lista li em { margin-left: auto; color: var(--c-ink-3); font-style: normal;
+                     font-variant-numeric: tabular-nums; }
+.jorn__lista li b { min-width: 32px; text-align: right;
+                    font-variant-numeric: tabular-nums; }
+
+.enlace-ficha { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--c-ink-3); }
+.enlace-ficha:hover, .enlace-ficha:focus { color: var(--c-accent); border-bottom-color: currentColor; }
+
+/* Desplegable propio
+   Sustituye al `<select>` nativo, cuya lista la pinta el sistema y sale gris
+   claro sobre el tema oscuro. Aquí la lista es propia, así que se estila. */
+
+.desple { position: relative; }
+.desple__btn {
+  width: 100%; display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  background: var(--c-surface-3); color: var(--c-ink);
+  border: 1px solid var(--c-line); border-radius: var(--r-sm);
+  text-align: left; cursor: pointer;
+  font-size: var(--t-sm);
+}
+.desple__btn:hover { border-color: var(--c-line-soft); }
+.desple__btn:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 1px; }
+.desple__valor { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+                 white-space: nowrap; }
+.desple__flecha { width: 16px; height: 16px; flex: none; color: var(--c-ink-2);
+                  transition: transform var(--vel); }
+.desple__btn[aria-expanded="true"] .desple__flecha { transform: rotate(180deg); }
+
+.desple__lista {
+  position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 2px);
+  margin: 0; padding: var(--s-1); list-style: none;
+  background: var(--c-surface-2); border: 1px solid var(--c-line-soft);
+  box-shadow: var(--sombra);
+  /* Una lista larga no puede empujar la página ni salirse de la pantalla. */
+  max-height: 264px; overflow-y: auto;
+}
+.desple__opcion {
+  padding: var(--s-3) var(--s-3); cursor: pointer; font-size: var(--t-sm);
+  display: flex; align-items: center; gap: var(--s-2);
+}
+.desple__opcion:hover { background: var(--c-surface-3); }
+.desple__opcion[aria-selected="true"] { color: var(--c-accent); font-weight: var(--w-bold); }
+.desple__opcion[aria-selected="true"]::before { content: '›'; }
+.desple__opcion:not([aria-selected="true"])::before { content: ''; width: 6px; }
+
+/* Plantilla de un manager */
+
+.fila-rival { display: flex; align-items: center; gap: var(--s-3);
+              padding: var(--s-2) var(--s-4); border-bottom: 1px solid var(--c-line); }
+.fila-rival:last-child { border-bottom: 0; }
+.fila-rival__ppal { flex: 1; min-width: 0; }
+.fila-rival__nom { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.fila-rival__datos { display: flex; gap: var(--s-3); margin-top: 2px;
+                     font-size: var(--t-xs); color: var(--c-ink-2);
+                     font-variant-numeric: tabular-nums; flex-wrap: wrap; }
+.fila-rival__acc { flex: none; }
+
+.jornada-pills { display: flex; gap: var(--s-2); flex-wrap: wrap;
+                 margin: var(--s-4) var(--s-4) var(--s-3); }
+.rival-once { display: grid; gap: var(--s-1); padding: 0 var(--s-4) var(--s-4); }
+.rival-once__j { display: flex; align-items: center; gap: var(--s-2);
+                 font-size: var(--t-sm); padding: 2px 0; }
+.rival-once__j b { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.fila__puesto { min-width: 1.5em; }
+
+/* Actividad */
+.act__barra { margin: var(--s-4) var(--s-4) var(--s-3); max-width: 22rem; }
+.act__mas { margin: var(--s-3) var(--s-4) var(--s-4); }
+
+
+/* Momentum
+   Mismo padding lateral que `.fila`: una fila suelta dentro de una tarjeta no
+   hereda ninguno, y el texto acaba pegado al borde. */
+.fila-mom { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-line); }
+.fila-mom:last-child { border-bottom: 0; }
+.fila-mom__ppal { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.fila-mom__val { margin-left: auto; font-size: var(--t-xs); color: var(--c-ink-2);
+                 font-variant-numeric: tabular-nums; }
+.fila-mom__pcts { display: flex; gap: var(--s-3); margin-top: 2px;
+                  font-size: var(--t-xs); font-variant-numeric: tabular-nums; }
+.fila-mom__acc { margin-top: var(--s-2); }
+
+/* Home
+   Un resumen, no un listado. Lo primero que se ve al abrir la app: dónde vas,
+   con cuánta caja, qué hay que atender y qué va a hacer el sistema solo. */
+
+.home__cab {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--s-3); align-items: center;
+  padding: var(--s-4); margin-bottom: var(--s-3);
+  background: var(--c-surface); border: 1px solid var(--c-line);
+}
+.home__pos { display: flex; align-items: baseline; gap: var(--s-2); }
+.home__posnum { font-size: var(--t-2xl); font-weight: var(--w-black); line-height: 1; }
+.home__posnum sup { font-size: var(--t-sm); }
+.home__caja, .home__jor { display: flex; flex-direction: column; gap: 2px; }
+.home__caja .dinero { font-size: var(--t-lg); font-weight: var(--w-bold); }
+.home__jor b { font-size: var(--t-md); }
+
+.home__rejilla {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: var(--s-3); padding: var(--s-4);
+}
+.home__rejilla > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.home__rejilla b { font-size: var(--t-sm); }
+.home__rejilla em { font-size: var(--t-xs); color: var(--c-ink-3); font-style: normal; }
+
+.home__pos-linea { display: flex; gap: var(--s-2); flex-wrap: wrap;
+                   padding: 0 var(--s-4) var(--s-4); }
+.home__chip { display: inline-flex; align-items: center; gap: var(--s-1);
+              font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+.home__chip--mal b { color: var(--c-crit); }
+.home__chip em { color: var(--c-ink-3); font-style: normal; font-size: var(--t-xs); }
+
+.home__linea {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3);
+  padding: var(--s-2) var(--s-4); font-size: var(--t-sm);
+}
+.home__sep { height: 1px; background: var(--c-line); margin: var(--s-2) var(--s-4); }
+
+/* Los atajos son la respuesta a «¿dónde está eso?»: lo que se usa a diario, a
+   un toque, sin recordar en qué pestaña vive. */
+.atajos {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: var(--s-2); padding: var(--s-4);
+}
+.atajo {
+  display: flex; align-items: center; gap: var(--s-2);
+  padding: var(--s-3); text-decoration: none; color: inherit;
+  background: var(--c-surface-3); border: 1px solid var(--c-line);
+  font-size: var(--t-sm);
+}
+.atajo:hover, .atajo:focus-visible { border-color: var(--c-accent); color: var(--c-accent); }
+.atajo__ico { width: 18px; height: 18px; flex: none; }
+
+
+/* Procesos del motor
+   Cada proceso dice qué hace y para qué sirve antes de ofrecer un botón: un
+   «Lanzar» a secas no permite decidir nada. */
+
+.proceso { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-line); }
+.proceso:last-child { border-bottom: 0; }
+.proceso--off { opacity: .55; }
+.proceso__cab { display: flex; align-items: center; gap: var(--s-3); }
+.proceso__sw { flex: none; display: flex; }
+.proceso__id { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.proceso__id b { font-size: var(--t-sm); }
+.proceso__clave { font-size: var(--t-xs); color: var(--c-ink-3); font-family: var(--f-num); }
+.proceso__estado { text-align: right; font-size: var(--t-xs); flex: none;
+                   display: flex; flex-direction: column; gap: 1px; }
+.proceso__que { font-size: var(--t-xs); color: var(--c-ink-2); margin: var(--s-2) 0 0; }
+.proceso__pie {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  flex-wrap: wrap; margin-top: var(--s-2);
+}
+
+/* El panel de configuración se despliega dentro de la fila: así se ve QUÉ proceso
+   se está tocando sin perder el contexto, que es lo que pasa con un modal. */
+.cfg {
+  margin-top: var(--s-3); padding: var(--s-4);
+  background: var(--c-surface-2); border: 1px solid var(--c-line-soft);
+}
+.cfg__que { font-size: var(--t-sm); margin: 0 0 var(--s-2); }
+.cfg__coste { font-size: var(--t-xs); color: var(--c-ink-2); margin: 0 0 var(--s-3); }
+.cfg__campos {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--s-3); margin: var(--s-3) 0;
+}
+.cfg__campo { display: flex; flex-direction: column; gap: var(--s-1); }
+.cfg__ayuda { font-size: var(--t-xs); color: var(--c-ink-3); margin: 0; }
+.cfg__pie { display: flex; gap: var(--s-2); justify-content: flex-end;
+            border-top: 1px solid var(--c-line); padding-top: var(--s-3); }
+
+/* Calendario de dificultad
+   Cinco niveles, del verde al rojo. El color codifica la dificultad para que se
+   lea la fila entera de un vistazo, sin interpretar números. */
+
+.fila-cal { display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+            align-items: center; gap: var(--s-3);
+            padding: var(--s-2) var(--s-4); border-bottom: 1px solid var(--c-line); }
+.fila-cal:last-child { border-bottom: 0; }
+.fila-cal__ppal { display: flex; align-items: center; gap: var(--s-2);
+                  flex-wrap: wrap; min-width: 0; }
+.fila-cal__celdas { display: flex; gap: 3px; }
+.fila-cal__fin { text-align: right; white-space: nowrap; }
+
+.dif { display: grid; place-items: center; min-width: 3.2rem; padding: var(--s-1) var(--s-2);
+       font-size: 10px; font-weight: var(--w-bold); text-transform: uppercase;
+       letter-spacing: .02em; line-height: 1.2; }
+.dif em { font-style: normal; font-size: 8px; opacity: .75; font-weight: var(--w-normal); }
+.dif--0 { background: var(--c-surface-3); color: var(--c-ink-3); }
+.dif--1 { background: var(--c-dif-1); color: var(--c-dif-1-ink); }
+.dif--2 { background: var(--c-dif-2); color: var(--c-dif-2-ink); }
+.dif--3 { background: var(--c-dif-3); color: var(--c-dif-3-ink); }
+.dif--4 { background: var(--c-dif-4); color: var(--c-dif-4-ink); }
+.dif--5 { background: var(--c-dif-5); color: var(--c-dif-5-ink); }
+
+.cal-cab { display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+           gap: var(--s-3); padding: var(--s-3) var(--s-4) var(--s-1);
+           border-bottom: 1px solid var(--c-line); }
+.cal-jor { min-width: 3.2rem; text-align: center; font-size: 10px;
+           color: var(--c-ink-3); text-transform: uppercase; letter-spacing: .06em; }
+
+/* Las tarjetas de la home tienen alturas muy distintas y una rejilla normal deja
+   huecos enormes debajo de las cortas. Con columnas CSS cada una ocupa lo suyo y
+   la siguiente sube a rellenar. */
+.home__cols { columns: 22rem auto; column-gap: var(--s-3); }
+.home__cols > * { break-inside: avoid; margin-bottom: var(--s-3); display: block; }
+.home__dos { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+             gap: var(--s-3); padding: var(--s-4); }
+.home__dos > div > .u-label { display: block; margin-bottom: var(--s-2); }
+.home__dos .home__linea { padding: var(--s-1) 0; }
+
+/* Premium */
+.prem { padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--c-line); }
+.prem:last-child { border-bottom: 0; }
+.prem--on { border-left: 3px solid var(--c-premium); }
+.prem__cab { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.prem__punto { width: 8px; height: 8px; border-radius: 50%; flex: none;
+               background: var(--c-ink-3); }
+.prem__punto.es-bien { background: var(--c-ok); }
+.prem__que { font-size: var(--t-sm); margin: var(--s-2) 0 0; }
+.prem__impacto { font-size: var(--t-xs); color: var(--c-ink-2); margin: var(--s-1) 0 0; }
+.prem__regla { font-size: var(--t-xs); color: var(--c-ink-3); margin: var(--s-1) 0 0; }
+.prem__rutas { list-style: none; margin: var(--s-2) 0 0; padding: 0 0 0 var(--s-3);
+               border-left: 2px solid var(--c-line); }
+.prem__rutas li { font-size: 10px; color: var(--c-ink-3); font-family: var(--f-num);
+                  padding: 1px 0; overflow-wrap: anywhere; }
+
+/* Conexión con LaLiga: el círculo de carga del login
+   El paso 2 tiene una espera real (canje del code contra B2C), así que necesita señal de
+   que sigue vivo. */
+.conex-cargando { display: flex; flex-direction: column; align-items: center;
+                  gap: var(--s-3); padding: var(--s-6) var(--s-4); text-align: center; }
+.conex-cargando p { margin: 0; }
+.spinner { width: 40px; height: 40px; border-radius: var(--r-full);
+           border: 3px solid var(--c-surface-3);
+           border-top-color: var(--c-accent);
+           animation: girar .8s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  /* El `!important` es obligatorio aquí: `tokens.css` corta TODA animación a .01ms con
+     `!important` dentro de esta misma media query, así que sin él estos 2s no se aplican
+     y el círculo se queda quieto. Girando despacio sigue diciendo que algo pasa, que es
+     lo único que este elemento tiene que comunicar. */
+  .spinner { animation-duration: 2s !important; }
+}
+
+/* Bienvenida: la primera pantalla de una instalación nueva
+ *
+ * Centrada y estrecha a propósito: es una pantalla de lectura, no un panel. El ancho
+ * máximo la mantiene legible en una tablet en horizontal, donde si no las líneas se
+ * irían a los 1.200 px y no se leería nada. */
+.bienv {
+  max-width: 34rem;
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-4) var(--s-10);
+  text-align: center;
+}
+
+.bienv__logo {
+  width: min(260px, 62%);
+  height: auto;
+  /* El margen automático es lo que lo centra, NO el `text-align: center` del padre:
+     `base.css` pone `img { display: block }` para todas las imágenes, y a un bloque el
+     `text-align` del contenedor no le afecta. Sin esto queda pegado a la izquierda. */
+  margin: 0 auto var(--s-6);
+}
+
+.bienv__titulo {
+  font-size: var(--t-2xl);
+  margin: 0 0 var(--s-3);
+  text-wrap: balance;
+}
+
+.bienv__lema {
+  color: var(--c-ink-2);
+  margin: 0 auto var(--s-8);
+  max-width: 30rem;
+  line-height: 1.55;
+}
+
+/* Los tres puntos van alineados a la IZQUIERDA aunque la pantalla esté centrada:
+   un texto de varias líneas centrado se lee peor, y aquí hay que leerlo. */
+.bienv__puntos {
+  display: grid;
+  gap: var(--s-4);
+  text-align: left;
+  margin-bottom: var(--s-8);
+}
+
+.bienv__punto {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: var(--s-3);
+  align-items: start;
+}
+
+.bienv__icono { color: var(--c-accent); display: block; line-height: 0; padding-top: 2px; }
+.bienv__punto-t { margin: 0 0 2px; font-weight: 600; }
+.bienv__punto-x { margin: 0; font-size: var(--t-sm); color: var(--c-ink-2); }
+
+.bienv__entrar { margin-bottom: var(--s-3); }
+
+.bienv__nota {
+  font-size: var(--t-sm);
+  color: var(--c-ink-2);
+  line-height: 1.5;
+  margin: 0 0 var(--s-6);
+}
+.bienv__nota--flojo { font-size: var(--t-xs); margin-top: var(--s-2); }
+
+/* Secundario y discreto: mirar sin conectar es una salida válida, no la principal. */
+.bienv__saltar {
+  background: transparent;
+  border-color: var(--c-line);
+  width: 100%;
+}
+
+.bienv__legal {
+  margin-top: var(--s-8);
+  text-align: left;
+  border-top: 1px solid var(--c-line);
+  padding-top: var(--s-4);
+  font-size: var(--t-sm);
+  color: var(--c-ink-2);
+}
+.bienv__legal summary { cursor: pointer; padding: var(--s-2) 0; }
+.bienv__legal p { margin: var(--s-3) 0; line-height: 1.55; }
+.bienv__legal a { color: var(--c-accent); }
+
+/* Instrucciones para crear el bot de Telegram. Van dentro de un <details> porque quien
+   ya lo tiene configurado no necesita verlas, y quien no, las necesita enteras. */
+.tg-pasos { border-top: 1px solid var(--c-line); padding-top: var(--s-3); }
+.tg-pasos summary { cursor: pointer; padding: var(--s-2) 0; color: var(--c-accent); }
+.tg-pasos__lista { margin: var(--s-2) 0; padding-left: var(--s-5); }
+.tg-pasos__lista li { margin-bottom: var(--s-3); line-height: 1.55; }
+.tg-pasos__lista code {
+  background: var(--c-ground-deep);
+  padding: 1px var(--s-1);
+  font-family: var(--f-num);
+  font-size: var(--t-sm);
+  word-break: break-all;
+}
+.tg-pasos__nota { font-size: var(--t-sm); color: var(--c-ink-2); margin: var(--s-3) 0 0; }
+
+/* Cargando: tres balones botando
+ *
+ * Botan y giran a la vez, desfasados 0,12 s (`--i`). Sin rotación se leen como puntos.
+ * La curva es asimétrica (lenta arriba, rápida abajo); una simétrica parece un muelle. */
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-6);
+  padding: var(--s-10) var(--s-4);
+  min-height: 40vh;
+}
+
+.cargando__balones { display: flex; gap: var(--s-5); align-items: flex-end; }
+
+.cargando__hueco {
+  position: relative;
+  width: 26px;
+  height: 52px;                       /* alto del salto + el balón + la sombra */
+  display: block;
+}
+
+/* Bote y giro van en elementos distintos: dos animaciones sobre `transform` no se suman,
+ * gana la última. Juntarlas pierde el bote sin dar ningún error.
+ * El envoltorio bota y se aplasta contra el suelo; la imagen gira dentro. */
+/* Anclado abajo: el reposo es `bottom: 2px`, justo sobre la sombra, para que el balón la
+ * toque y salga rebotado. Anclado arriba se lee como levitación, no como bote. */
+.cargando__balon {
+  position: absolute;
+  inset: auto 0 2px 0;
+  width: 26px;
+  height: 26px;
+  transform-origin: 50% 100%;         /* se aplasta contra el suelo, no contra su centro */
+  animation: bote 0.66s cubic-bezier(0.3, 0, 0.55, 1) infinite alternate;
+  animation-delay: calc(var(--i) * 0.12s);
+}
+
+.cargando__balon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: rueda 1.1s linear infinite;
+  /* Desfase NEGATIVO: cada balón empieza ya girado en vez de los tres en formación.
+     Con retardo positivo se quedarían quietos esperando su turno. */
+  animation-delay: calc(var(--i) * -0.3s);
+}
+
+/* La sombra late al revés que el balón: pequeña y oscura cuando toca el suelo, ancha y
+   difusa cuando está arriba. Es lo que da sensación de altura. */
+.cargando__sombra {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 22px;
+  height: 5px;
+  margin-left: -11px;
+  border-radius: 50%;
+  background: var(--c-ink-3);
+  animation: sombra 0.66s cubic-bezier(0.3, 0, 0.55, 1) infinite alternate;
+  animation-delay: calc(var(--i) * 0.12s);
+}
+
+/* El aplastado del suelo dura un instante (el 10 % del recorrido): un balón pasa casi
+   todo el tiempo en el aire, y si se aplasta despacio parece de goma. */
+@keyframes bote {
+  0%   { transform: translateY(0) scale(1.12, 0.88); }   /* tocando la sombra, aplastado */
+  10%  { transform: translateY(-4px) scale(1, 1); }
+  100% { transform: translateY(-22px) scale(1, 1); }     /* arriba del todo */
+}
+@keyframes rueda { to { transform: rotate(360deg); } }
+@keyframes sombra {
+  from { opacity: .45; transform: scaleX(1); }
+  to   { opacity: .15; transform: scaleX(.6); }
+}
+
+.cargando__texto { color: var(--c-ink-2); margin: 0; }
+
+/* Sin movimiento para quien lo pide. Los balones siguen ahí (se entiende igual que
+   está cargando) pero quietos. */
+@media (prefers-reduced-motion: reduce) {
+  .cargando__balon, .cargando__balon img, .cargando__sombra { animation: none; }
+  .cargando__balon { transform: translateY(-11px); }
+}

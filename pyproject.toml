@@ -1,0 +1,47 @@
+[project]
+name = "fantasy-coconut"
+version = "1.5.1"
+description = "Sistema de decisión para LaLiga Fantasy"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 95
+target-version = "py312"
+extend-exclude = ["web", "android"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",      # pycodestyle
+    "F",           # pyflakes
+    "I",           # orden de imports
+    "B",           # bugbear
+    "C4",          # comprensiones
+    "UP",          # sintaxis moderna
+    "SIM",         # simplificaciones
+    "RUF",
+]
+
+ignore = [
+    "B008",        # `Depends(...)` en argumentos por defecto es la forma de FastAPI
+    "BLE001",      # `except Exception` en trabajos de fondo, siempre con su motivo al lado
+    "ISC001", "ISC003",   # cadenas concatenadas: así están escritos los textos largos
+    "E501",        # el largo lo controla `line-length`
+    "SIM105",      # `contextlib.suppress` oculta más de lo que ahorra aquí
+    "RUF001", "RUF002", "RUF003",   # los textos van en español
+    "RUF012",      # ClassVar en dataclasses de configuración
+]
+
+[tool.ruff.lint.per-file-ignores]
+# El glob casa contra la ruta entera, no contra el nombre: `"__init__.py"` a secas solo
+# alcanza a uno en la raíz, y los seis de este proyecto cuelgan de `src/`. Queda como red
+# para un `__init__.py` que reexporte sin declarar `__all__`; el de `api/informe` lo
+# declara, así que no depende de esto.
+"**/__init__.py" = ["F401", "E402"]   # re-exportar es su trabajo
+"scripts/*" = ["T201", "S101", "B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["fantasy_coconut"]
+
+[tool.ruff.lint.mccabe]
+# Una señal, no una norma: hay funciones legítimamente largas.
+max-complexity = 15

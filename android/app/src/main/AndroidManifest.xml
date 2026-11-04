@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- El motor corre como servicio en primer plano: es la única forma que Android
+         respeta para que los trabajos sigan a su hora con la app cerrada, y el precio es
+         una notificación permanente. `DATA_SYNC` es el tipo que corresponde, y desde la
+         API 34 declararlo es obligatorio: sin él, `startForeground()` lanza excepción. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Desde la API 33 la notificación no se ve si el usuario no la concede. El servicio
+         corre igual, pero sin ella nadie sabe si el motor está vivo. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Que el proceso no se duerma entre dos trabajos del scheduler. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- Para poder OFRECER la exclusión de optimización de batería. Sin ella, las capas
+         de Xiaomi, Samsung y Huawei matan el servicio igual. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="false"
+        android:theme="@style/Tema"
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/red">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:windowSoftInputMode="adjustResize">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Captura el redirect del login de LaLiga. Es el esquema que ningún
+                 navegador sabe abrir y que obliga a copiar el `code` a mano en la versión
+                 web. Declarado aquí, si el login ocurre en otro navegador del móvil,
+                 Android devuelve el control a la app con el code. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="authredirect" />
+            </intent-filter>
+        </activity>
+
+        <!-- `exported="false"`: lo arranca la propia app y nadie más. Un servicio que
+             levanta un servidor HTTP y habla con la cuenta de LaLiga no tiene por qué
+             ser accesible desde otras apps del teléfono. -->
+        <service
+            android:name=".ServicioCoconut"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+    </application>
+</manifest>

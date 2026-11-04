@@ -1,0 +1,393 @@
+/* ============================================================================
+   layout.css: el armazón: cabecera, pestañas, contenido, navegación inferior.
+   Copia la estructura de la app: header fino con título centrado, sub-pestañas
+   subrayadas, barra de meta y navegación de iconos abajo.
+   ========================================================================== */
+
+.app {
+  /* `dvh` y no `vh`: en móvil la barra del navegador aparece y desaparece, y con
+     `vh` el contenido salta cada vez que se desplaza. */
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  /* `minmax(0, 1fr)` y no la columna implícita: una pista de grid tiene
+     `min-width: auto`, o sea que crece hasta que quepa su contenido. Sin el `minmax`, un
+     hijo ancho como la barra de sub-pestañas estira la página entera aunque tenga su
+     propio `overflow-x: auto`: el contenedor le da todo el sitio que pide y ese scroll no
+     se activa nunca. */
+  grid-template-columns: minmax(0, 1fr);
+  /* Hueco para la navegación, que en vertical va fija encima de todo. En pantalla
+     ancha y en móvil horizontal pasa a ser una columna del grid (ver más abajo). */
+  padding-bottom: calc(var(--h-nav) + env(safe-area-inset-bottom, 0px));
+}
+
+/* Cabecera */
+
+.cabecera {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--c-ground-deep);
+  border-bottom: 2px solid var(--c-accent);
+}
+
+.cabecera__barra {
+  /* Posición explícita de los tres: ocultar o quitar uno no debe mover a los otros. */
+  height: var(--h-header);
+  max-width: var(--ancho-max); margin: 0 auto;
+  padding: 0 var(--s-4);
+  /* `minmax(0, 1fr)` y NO `1fr`: una pista de grid tiene `min-width: auto`, así que no
+     se encoge por debajo de su contenido. Con un título en `nowrap`, un `1fr` empuja la
+     cabecera fuera del viewport y desborda la página entera, y el `text-overflow:
+     ellipsis` no llega a actuar nunca porque el elemento nunca se queda estrecho. */
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; align-items: center;
+}
+
+.cabecera__titulo {
+  text-align: center;
+  font-size: var(--t-md); font-weight: var(--w-bold);
+  letter-spacing: .02em;
+  /* Lo mismo por el otro lado: sin `min-width: 0` el hijo tampoco se deja encoger. */
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cabecera__titulo { grid-column: 2; }
+.cabecera__accion--menu { grid-column: 1; }
+.cabecera__accion--fin  { grid-column: 3; }
+.cabecera__titulo em { font-style: normal; color: var(--c-accent); }
+
+.cabecera__accion {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  color: var(--c-ink); border-radius: var(--r-md);
+}
+.cabecera__accion:hover { background: var(--c-surface-2); }
+.cabecera__accion--fin { justify-self: end; }
+
+/* Sub-pestañas (Alineación · Plantilla · Puntos) */
+
+.subtabs {
+  display: flex; justify-content: center; gap: var(--s-6);
+  background: var(--c-ground-deep);
+  padding: 0 var(--s-4);
+  border-bottom: 1px solid var(--c-line);
+  overflow-x: auto;
+}
+
+.subtabs__item {
+  padding: var(--s-3) var(--s-1) calc(var(--s-3) - 2px);
+  color: var(--c-ink-2); font-weight: var(--w-med); white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: color var(--vel) var(--curva);
+}
+.subtabs__item:hover { color: var(--c-ink); }
+.subtabs__item[aria-selected="true"] { color: var(--c-ink); border-bottom-color: var(--c-accent); }
+
+/* Barra de meta (FICHAS · JORNADA · VALOR EQUIPO) */
+
+.meta {
+  display: flex; align-items: flex-start; gap: var(--s-6);
+  padding: var(--s-3) var(--s-4);
+  background: var(--c-ground-deep);
+  border-bottom: 1px solid var(--c-line);
+}
+.meta__ultimo { margin-left: auto; text-align: right; }
+.meta__valor { font-size: var(--t-base); font-weight: var(--w-bold); }
+.meta__punto { color: var(--c-accent); }
+
+/* Contenido */
+
+.principal {
+  max-width: var(--ancho-max); width: 100%; margin: 0 auto;
+  padding: var(--s-4) var(--s-4) var(--s-8);
+  display: flex; flex-direction: column; gap: var(--s-4);
+}
+
+.rejilla {
+  display: grid; gap: var(--s-4);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  align-items: start;
+}
+
+/* Navegación inferior. En vertical va `fixed` y no `sticky`: está al final del
+   documento, y ahí `sticky` solo la pega abajo cuando ya has llegado al final, o sea
+   nunca cuando hace falta. En pantalla ancha pasa a `sticky` como columna. */
+
+.nav {
+  /* `fixed` la saca del flujo del grid, así que estar dentro de `.app` no le añade una
+     fila en móvil vertical. Tiene que estar dentro para poder ser una columna del grid
+     en pantallas anchas (ver el bloque de adaptación al final del fichero). */
+  position: fixed; inset: auto 0 0 0; z-index: 30;
+  background: var(--c-ground-deep);
+  border-top: 1px solid var(--c-line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);   /* barra de gestos del móvil */
+}
+.nav__lista {
+  max-width: var(--ancho-max); margin: 0 auto;
+  height: var(--h-nav);
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+}
+.nav__item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--s-1); padding: 0 2px;
+  color: var(--c-ink-2); font-size: var(--t-xs); font-weight: var(--w-med);
+  line-height: 1.1; text-align: center;
+  transition: color var(--vel) var(--curva);
+  -webkit-tap-highlight-color: transparent;
+}
+.nav__item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav__item:hover { color: var(--c-ink); }
+.nav__item[aria-current="page"] { color: var(--c-accent); }
+.nav__icono { width: 22px; height: 22px; flex: none; }
+
+/* Menú lateral (el hamburguesa) */
+
+.menu[hidden] { display: none; }
+
+.menu__velo {
+  position: fixed; inset: 0; z-index: 40;
+  background: var(--c-velo);
+  animation: aparecer var(--vel) var(--curva);
+}
+
+.menu__panel {
+  position: fixed; inset: 0 auto 0 0; z-index: 41;
+  width: min(320px, 86vw);
+  background: var(--c-ground-deep);
+  border-right: 1px solid var(--c-line);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overscroll-behavior: contain;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: entrar var(--vel) var(--curva);
+}
+
+.menu__cabecera {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-4);
+  border-bottom: 1px solid var(--c-line);
+}
+.menu__marca { font-size: var(--t-lg); font-weight: var(--w-black); letter-spacing: .02em; }
+.menu__marca em { font-style: normal; color: var(--c-accent); }
+.menu__cerrar {
+  margin-left: auto; width: 40px; height: 40px;
+  display: grid; place-items: center; border-radius: var(--r-md);
+  color: var(--c-ink-2);
+}
+.menu__cerrar:hover { background: var(--c-surface-2); color: var(--c-ink); }
+
+.menu__grupo { padding: var(--s-3) 0; border-bottom: 1px solid var(--c-line); }
+.menu__titulo { padding: var(--s-2) var(--s-4); }
+
+.menu__item {
+  display: flex; align-items: center; gap: var(--s-3);
+  width: 100%; min-height: 46px; padding: var(--s-2) var(--s-4);
+  color: var(--c-ink-2); font-size: var(--t-base); font-weight: var(--w-med);
+  text-align: left;
+}
+.menu__item:hover { background: var(--c-surface-2); color: var(--c-ink); text-decoration: none; }
+.menu__item[aria-current="page"] { color: var(--c-accent); box-shadow: inset 3px 0 0 var(--c-accent); }
+.menu__item svg { flex: none; }
+
+.menu__dato {
+  display: flex; align-items: baseline; gap: var(--s-2);
+  padding: var(--s-1) var(--s-4); font-size: var(--t-sm);
+}
+.menu__dato b { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+@keyframes aparecer { from { opacity: 0; } }
+@keyframes entrar { from { transform: translateX(-100%); } }
+
+/* Portada de acceso */
+
+.portada {
+  min-height: 70dvh;
+  display: grid; place-items: center;
+  padding: var(--s-5) var(--s-3);
+}
+.portada__caja {
+  width: min(380px, 100%);
+  display: flex; flex-direction: column; gap: var(--s-3);
+  background: var(--c-surface); border: 1px solid var(--c-line);
+  border-radius: var(--r-lg); padding: var(--s-6) var(--s-5);
+  box-shadow: var(--sombra);
+}
+.portada__marca {
+  font-size: var(--t-2xl); font-weight: var(--w-black); letter-spacing: .02em;
+  text-align: center; color: var(--c-accent);
+}
+.portada__lema { text-align: center; color: var(--c-ink-2); font-size: var(--t-sm);
+                 margin-bottom: var(--s-3); }
+.portada__nota { font-size: var(--t-xs); color: var(--c-ink-3); text-align: center; }
+.portada__o {
+  display: flex; align-items: center; gap: var(--s-3);
+  color: var(--c-ink-3); font-size: var(--t-xs);
+}
+.portada__o::before, .portada__o::after {
+  content: ""; flex: 1; height: 1px; background: var(--c-line);
+}
+
+.pie {
+  padding: var(--s-5) var(--s-4);
+  border-top: 1px solid var(--c-line);
+  background: var(--c-ground-deep);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-4);
+  justify-content: center; text-align: center;
+  font-size: var(--t-sm); color: var(--c-ink-2);
+}
+.pie__autor { color: var(--c-ink); font-weight: var(--w-med); }
+.pie__enlace { display: inline-flex; align-items: center; gap: var(--s-2); color: var(--c-ink-2); }
+.pie__enlace:hover { color: var(--c-ink); text-decoration: none; }
+.pie__enlace svg { width: 16px; height: 16px; }
+
+/* Adaptación
+   Se opera desde el móvil, así que el móvil no es el caso degradado: es el caso
+   normal. Lo que se ajusta al estrechar es densidad, no funciones. */
+
+/* Tablet: caben dos columnas y la cabecera respira. */
+@media (min-width: 700px) {
+  .cabecera__barra { padding: 0 var(--s-5); }
+  .principal { padding: var(--s-5) var(--s-5) var(--s-8); }
+}
+
+@media (max-width: 560px) {
+  .principal { padding: var(--s-3) var(--s-3) var(--s-6); }
+  .meta { gap: var(--s-4); }
+  .pie { padding: var(--s-4) var(--s-3); font-size: var(--t-xs); }
+  .subtabs { gap: var(--s-4); justify-content: flex-start; }
+  /* El título centrado tiene 40px a cada lado: hay que dejarle truncar. */
+  .cabecera__titulo { font-size: var(--t-base); overflow: hidden;
+                      text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* Seis destinos en 360 px: el texto se encoge antes que desaparecer, porque un
+   icono suelto no dice qué sección es. */
+@media (max-width: 400px) {
+  :root { --h-nav: 58px; }
+  .nav__item { font-size: 9.5px; letter-spacing: -.01em; }
+  .nav__icono { width: 20px; height: 20px; }
+}
+
+/* Adaptación a los seis escenarios: móvil, tablet y ordenador, cada uno en vertical
+   y en horizontal. De aquí sale todo lo que viene debajo.
+
+   El recurso escaso cambia con la orientación. En vertical sobra alto y falta ancho,
+   así que la nav va abajo, al alcance del pulgar. En horizontal y en pantallas
+   grandes sobra ancho y falta alto, así que va a un lado y devuelve sus 62px al
+   contenido. Sin un breakpoint por altura, el móvil horizontal se queda con ~240px
+   útiles: cabecera, subtabs y nav se comen el 39 %.
+
+   Y el ancho que sobra se reparte en columnas, no en márgenes: una sola columna en
+   un monitor de 1920 apila decenas de tarjetas en vertical. */
+
+/* 1. Nav lateral: pantallas anchas o poco altas. Las dos condiciones comparten
+   solución. La segunda (`max-height`) es la que arregla el móvil horizontal, donde
+   el alto es el recurso escaso; se le exige `min-width: 600px` para no aplicarla a
+   un móvil vertical pequeño, donde no cabría. */
+@media (min-width: 1000px), (max-height: 560px) and (min-width: 600px) {
+  .app {
+    /* La nav pasa a ser una COLUMNA del grid, no un elemento fijo encima. */
+    grid-template-columns: var(--w-nav) minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    padding-bottom: 0;                       /* ya no hay barra abajo que esquivar */
+  }
+  .cabecera { grid-column: 2; }
+  .principal { grid-column: 2; }
+  .pie       { grid-column: 2; }
+
+  .nav {
+    position: sticky; inset: 0 auto 0 0;
+    grid-column: 1; grid-row: 1 / -1;
+    height: 100dvh;
+    border-top: 0; border-right: 1px solid var(--c-line);
+    padding-bottom: 0;
+  }
+  .nav__lista {
+    height: auto; max-width: none; margin: 0;
+    grid-auto-flow: row; grid-auto-columns: none;
+    padding: var(--s-3) var(--s-2);
+    gap: 2px;
+  }
+  .nav__item {
+    flex-direction: row; justify-content: flex-start;
+    gap: var(--s-3); padding: var(--s-3);
+    font-size: var(--t-sm); text-align: left;
+  }
+  /* La sección activa se marca con una barra lateral, no solo con color: en una
+     lista vertical el color solo es difícil de localizar de un vistazo. */
+  .nav__item[aria-current="page"] {
+    background: var(--c-surface); box-shadow: inset 2px 0 0 var(--c-accent);
+  }
+  /* El botón de menú NO se oculta, aunque las secciones ya estén a la vista:
+       1. `display: none` sobre un hijo de grid corre a los demás de columna: el
+          título caería en la de 40px y saldría truncado a «CO…».
+       2. El menú no es un duplicado de la nav: lleva el estado del sistema (modo,
+          peticiones del día, WAF, caja) y la sesión, que no están en ningún otro
+          sitio. Ocultarlo esconde información, no ruido. */
+}
+
+/* En horizontal estrecho la nav va a iconos: 62px de ancho en vez de 200, porque
+   ahí lo que falta es alto y el texto obligaría a encoger la fuente. */
+@media (max-height: 560px) and (min-width: 600px) {
+  :root { --w-nav: 62px; }
+  .nav__item { flex-direction: column; gap: 2px; padding: var(--s-2) 0;
+               justify-content: center; font-size: 9.5px; text-align: center; }
+  .nav__item span { font-size: 9.5px; }
+}
+
+/* 2. Cromo compacto cuando el alto escasea */
+@media (max-height: 560px) {
+  /* `height` y no `min-height`: la barra tiene el alto fijo de `--h-header`, así que un
+     mínimo por debajo no la encoge y deja la cabecera igual de alta justo donde falta
+     alto. Son 8px de los ~390 que hay en un móvil en horizontal. */
+  .cabecera__barra { height: 44px; }
+  .subtabs { padding-top: 0; padding-bottom: 0; }
+  .subtabs__item { padding: var(--s-2) 0; }
+  .principal { padding-top: var(--s-3); padding-bottom: var(--s-4); gap: var(--s-3); }
+  /* El pie es informativo: en horizontal roba alto sin aportar nada operativo. */
+  .pie { display: none; }
+}
+
+/* 3. El ancho que sobra se reparte en COLUMNAS
+   `auto-fit` + `minmax` = el número de columnas lo decide el espacio disponible,
+   así que esto vale igual para tablet horizontal, portátil y monitor grande sin
+   una regla por dispositivo.
+
+   `align-items: start` es obligatorio: sin él las tarjetas de una fila se
+   estiran a la altura de la más alta y quedan huecos enormes debajo de las cortas. */
+@media (min-width: 1000px) {
+  :root { --ancho-max: 1600px; }
+
+  /* `columns` y NO `grid`: con `grid auto-fit` las tarjetas van en FILAS y cada fila
+     mide lo que la más alta, así que una tarjeta larga deja un hueco vertical enorme
+     bajo la de al lado. `align-items: start` evita que se estiren, pero no elimina el
+     hueco. `columns` rellena de arriba abajo sin huecos, igual que hace `.home__cols`
+     por dentro de la Home.
+     El coste es el orden: se lee por columnas, no por filas. Aceptable porque lo
+     urgente va primero y queda arriba a la izquierda. */
+  .principal {
+    display: block;
+    columns: 26rem auto;
+    column-gap: var(--s-4);
+  }
+  /* Sin esto una tarjeta se parte a mitad entre dos columnas. */
+  .principal > * { break-inside: avoid; margin-bottom: var(--s-4); }
+
+  /* La Home ya reparte en columnas por dentro: anidar `columns` dentro de `columns`
+     da resultados impredecibles, así que dentro de `.principal` se desactiva el suyo. */
+  .principal .home__cols { columns: auto; }
+
+  /* Lo que NO debe partirse en columnas estrechas: el campo de alineación pide el ancho
+     completo, y `column-span: all` lo saca del flujo de columnas.
+
+     Va sobre `.tarjeta--ancha` y no sobre `.campo` porque el campo siempre viaja dentro
+     de una tarjeta: como hijo directo de `.principal` no está nunca, así que un selector
+     sobre `.campo` no casa con nada y el terreno de juego cae en una columna de 26rem. */
+  .principal > .tarjeta--ancha { column-span: all; }
+}
+
+/* El icono de la cabecera. `flex` en vez del `block` del reset de base.css, para que
+   quede alineado con la línea base del texto y no colgando.
+
+   Con `display: flex` el `text-align: center` de arriba deja de colocar nada, así que el
+   centrado hay que pedirlo otra vez con `justify-content`. Sin esto el título se va a la
+   izquierda de su columna, con tres sitios del fichero afirmando que está centrado. */
+.cabecera__titulo { display: flex; align-items: center; justify-content: center;
+                    gap: var(--s-2); }
+.cabecera__icono { flex: none; border-radius: 4px; display: block; }

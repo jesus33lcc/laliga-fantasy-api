@@ -1,0 +1,123 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.chaquo.python'
+}
+
+android {
+    namespace 'com.coconut.fantasy'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.coconut.fantasy"
+        // 24 = Android 7. Cubre prácticamente cualquier móvil en uso y evita tener que
+        // arrastrar compatibilidad con WebViews antiguos que no soportan ES6.
+        minSdk 24
+        targetSdk 34
+        versionCode 21
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Python dentro del APK (Chaquopy). Los `abiFilters` van aquí obligatoriamente:
+        // Chaquopy los exige en `defaultConfig` y falla la configuración si solo están por
+        // tipo de compilación. No hay forma de pedir arm64 en release y las dos en debug.
+        //
+        // Cada arquitectura mete su copia del intérprete y de las ruedas nativas: ~14 MB.
+        // Por defecto va solo arm64-v8a, que cubre cualquier móvil real; el emulador de CI
+        // es x86_64 y se pide con `-PconEmulador`.
+        ndk {
+            abiFilters "arm64-v8a"
+            if (project.hasProperty("conEmulador")) abiFilters "x86_64"
+        }
+
+        python {
+            // La MISMA versión que corre en el servidor. No es casualidad: con otra
+            // versión habría que comprobar cada diferencia de lenguaje por separado.
+            version "3.12"
+            pip {
+                // Las diferencias con requirements.txt (pydantic 1, uvicorn sin
+                // `[standard]`, sin asyncpg) están explicadas en el propio fichero.
+                install "-r", "src/main/python/requisitos-android.txt"
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Sin ofuscar: el APK se publica en GitHub y que sea inspeccionable es una
+            // virtud aquí, no un problema. Además R8 con WebView pide reglas extra.
+            minifyEnabled false
+            // Firmado con la clave de DEBUG a propósito: se distribuye por GitHub
+            // Releases, no por Play Store, así que el workflow puede compilarlo sin
+            // secretos en el repositorio. El coste: Android lo trata como app de origen
+            // desconocido, y no se puede actualizar encima de un APK firmado con otra
+            // clave sin desinstalar primero.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    // El paquete REAL de Coconut entra en el APK desde `repo/src`, sin copiarlo: así no
+    // hay dos versiones del código que puedan divergir. Chaquopy empaqueta todo lo que
+    // encuentre en estos directorios.
+    sourceSets {
+        main {
+            python {
+                srcDirs = ["src/main/python", "../../src"]
+            }
+            // La interfaz se sincroniza desde `repo/web` a un directorio generado (ver la
+            // tarea `prepararWeb` abajo) y entra como *asset*. Tampoco se duplica en el
+            // repositorio: la fuente sigue siendo una sola.
+            assets.srcDirs += layout.buildDirectory.dir("generated/assets-coconut")
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.activity:activity-ktx:1.9.2'
+    // Para "tirar hacia abajo para recargar": en un envoltorio de web es lo primero que
+    // la gente intenta cuando algo no se actualiza.
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    // Solo para las pruebas instrumentadas: no entran en el APK de release.
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+}
+
+
+/* La interfaz web dentro del APK.
+ *
+ * `Sync` y no `Copy`: borra del destino lo que no esté en el origen. Con `Copy`, un
+ * fichero renombrado deja su versión vieja dentro del APK para siempre y el WebView puede
+ * seguir cargándola.
+ *
+ * Se excluye `dist/`: es el paquete de un solo fichero con los datos dentro, para enseñar
+ * Coconut sin VPN. En el móvil sobra, y son 690 KB.
+ */
+def prepararWeb = tasks.register('prepararWeb', Sync) {
+    from("$rootDir/../web") {
+        exclude 'dist/**'
+    }
+    into layout.buildDirectory.dir("generated/assets-coconut/web")
+}
+
+/* El esquema también tiene que viajar. En un móvil recién instalado no hay base de datos:
+ * SQLite crea el fichero solo, pero vacío, y sin las 30 tablas la app arranca y falla en
+ * la primera consulta. Vive en `repo/db/*.sql` y entra en el APK igual que la interfaz.
+ */
+def prepararEsquema = tasks.register('prepararEsquema', Sync) {
+    from("$rootDir/../db") {
+        include '*_sqlite.sql'      // solo el de SQLite; el de Postgres aquí no sirve
+    }
+    into layout.buildDirectory.dir("generated/assets-coconut/db")
+}
+
+tasks.named('preBuild').configure { dependsOn(prepararWeb, prepararEsquema) }

@@ -1,0 +1,34 @@
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Datos y artefactos de ejecución
+data/
+datos/
+logs/
+cache/
+decisions/
+web/dist/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+*.keystore
+
+# Editores y sistema
+.DS_Store
+.idea/
+.vscode/

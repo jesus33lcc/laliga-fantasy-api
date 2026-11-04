@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tema oscuro fijo, igual que la web: Coconut no tiene modo claro a propósito.
+         El fondo coincide con el token c-ground-deep de tokens.css para que el arranque no
+         dé un fogonazo blanco antes de que cargue el WebView. -->
+    <style name="Tema" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/fondo</item>
+        <item name="android:statusBarColor">@color/fondo</item>
+        <item name="android:navigationBarColor">@color/fondo</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

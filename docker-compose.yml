@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: coconut
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?falta DB_PASSWORD en .env}
+      POSTGRES_DB: coconut
+    volumes:
+      - ./datos/pgdata:/var/lib/postgresql/data
+      # Solo el esquema de Postgres, NO el directorio entero: Postgres ejecuta todo
+      # `.sql` que encuentre aquí, y los `*_sqlite.sql` usan el tipo `JSONTEXT`, que no
+      # conoce. El init aborta con exit 3 y el contenedor no llega a levantar. Solo se
+      # ve en una instalación NUEVA: con el volumen ya inicializado este directorio ni
+      # se mira. `docker/arranque.sh` los salta por el mismo motivo.
+      - ./db/001_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coconut"]
+      interval: 10s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build: .
+    command: uvicorn fantasy_coconut.api.main:app --host 0.0.0.0 --port 8000
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://coconut:${DB_PASSWORD}@db:5432/coconut
+    depends_on:
+      db: {condition: service_healthy}
+    # Atado a la IP de la VPN, no a `0.0.0.0`: en 0.0.0.0 queda expuesta a toda la red
+    # local una interfaz que ejecuta operaciones con dinero. En `localhost` solo se
+    # alcanza desde la propia máquina, así que para usarla desde el móvil va aquí.
+    ports: ["TU_SERVIDOR:8140:8000"]
+    volumes:
+      - ./src:/app/src
+      - ./web:/app/web          # interfaz web, servida en /app por la propia API
+      - ./decisions:/app/decisions
+      - ./datos/state:/data
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: python -m fantasy_coconut.ingest.scheduler
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://coconut:${DB_PASSWORD}@db:5432/coconut
+    depends_on:
+      db: {condition: service_healthy}
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts:ro
+      - ./datos/state:/data
+    restart: unless-stopped

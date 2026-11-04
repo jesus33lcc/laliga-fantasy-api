@@ -1,0 +1,55 @@
+/* ============================================================================
+   base.css: reset, tipografía y utilidades. Sin componentes.
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--c-ground);
+  color: var(--c-ink);
+  font: var(--w-normal) var(--t-base)/1.45 var(--f-ui);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 { margin: 0; font-weight: var(--w-bold); line-height: 1.2; text-wrap: balance; }
+h1 { font-size: var(--t-lg); }
+h2 { font-size: var(--t-md); }
+h3 { font-size: var(--t-base); }
+p  { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+img { max-width: 100%; display: block; }
+
+a { color: var(--c-accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+
+:focus-visible { outline: 2px solid var(--c-info); outline-offset: 2px; border-radius: var(--r-sm); }
+
+/* Utilidades. Solo estas: cualquier otra cosa es un componente. */
+
+.u-num      { font-variant-numeric: tabular-nums; }
+.u-label    { font-size: var(--t-xs); font-weight: var(--w-med); letter-spacing: .08em;
+              text-transform: uppercase; color: var(--c-ink-2); }
+.u-dim      { color: var(--c-ink-2); }
+.u-dimmer   { color: var(--c-ink-3); }
+.u-ok       { color: var(--c-ok); }
+.u-crit     { color: var(--c-crit); }
+.u-accent   { color: var(--c-accent); }
+.u-trunc    { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.u-oculto   { display: none !important; }
+
+.u-pila     { display: flex; flex-direction: column; gap: var(--s-3); }
+.u-pila-sm  { display: flex; flex-direction: column; gap: var(--s-2); }
+.u-fila     { display: flex; align-items: center; gap: var(--s-3); }
+.u-crecer   { flex: 1; min-width: 0; }
+.u-tenue    { color: var(--c-ink-2); font-size: var(--t-sm); }
+
+/* Atenúa sin cambiar el color, para lo secundario dentro de una línea. */
+.tenue { opacity: .55; }

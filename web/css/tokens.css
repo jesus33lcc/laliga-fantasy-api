@@ -1,0 +1,135 @@
+/* ============================================================================
+   tokens.css: el único sitio donde se escriben colores, tamaños y tiempos.
+   Ningún otro fichero puede llevar un color literal. Si necesitas uno nuevo,
+   se añade aquí con nombre.
+
+   Los valores salen de las capturas de la app oficial de LaLiga Fantasy.
+   La app oficial es de tema oscuro único y esto la imita a propósito:
+   no hay tema claro, y por eso cada color se pinta explícito.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+ /* Fondos */
+  --c-ground:      #12121F;   /* fondo de la app */
+  --c-ground-deep: #0A0A13;   /* header, campo, barras */
+  --c-surface:     #1D1D2C;   /* tarjeta */
+  --c-surface-2:   #26263A;   /* tarjeta elevada, hover, input */
+  --c-surface-3:   #32324A;   /* chip neutro, pista de barra */
+  --c-line:        #2E2E42;   /* borde */
+  --c-line-soft:   #23233385; /* separador dentro de una tarjeta */
+
+ /* Texto */
+  --c-ink:    #FFFFFF;
+  --c-ink-2:  #9A9AAF;   /* secundario, labels */
+  --c-ink-3:  #6E6E85;   /* deshabilitado, marca de agua */
+  --c-on-accent: #FFFFFF;
+
+ /* Marca */
+  --c-accent:       #FF4B44;   /* el rojo de LaLiga Fantasy, tomado del logo oficial */
+  --c-accent-press: #E0362F;
+  --c-gold:         #FFD400;   /* botón de recompensa, moneda */
+  --c-premium:      #7C5CFF;   /* capitán, entrenador, Premium */
+
+ /* Semántica
+     `--c-crit` es el rojo de marca a propósito: la app oficial usa el mismo tono
+     para su identidad y para lo grave, y dos rojos que solo se distinguen de cerca
+     no separan nada. Lo crítico se marca por la FORMA (borde izquierdo, relleno,
+     icono), no por un segundo tono. Va con `var()` para que los dos no puedan
+     separarse por un dígito. */
+  --c-ok:    #38D66B;
+  --c-warn:  #F5A623;
+  --c-crit:  var(--c-accent);
+  --c-info:  #3FA3E8;
+
+ /* Fondos translúcidos de cada color
+     Son el mismo tono con alfa, para chips y filas resaltadas. Van aquí porque
+     ningún otro fichero puede llevar un color literal. */
+  --c-ok-fondo:      #38D66B26;
+  --c-warn-fondo:    #F5A62326;
+  --c-crit-fondo:    #FF4B4426;
+  --c-info-fondo:    #3FA3E826;
+  --c-premium-fondo: #7C5CFF26;
+  --c-accent-tenue:  #FF4B440F;   /* fila propia, apenas teñida */
+  --c-accent-suave:  #FF4B4414;   /* hueco del campo */
+  --c-accent-fuerte: #FF4B44E6;   /* etiqueta sobre la ficha */
+
+ /* Texto SOBRE un fondo de color
+     Cada uno es una versión muy oscura de su propio fondo, así que contrasta
+     conservando el tono en vez de recurrir al negro puro. */
+  --c-sobre-claro:   #12121F;   /* chip de posición, ficha */
+  --c-sobre-oro:     #1A1A00;
+  --c-sobre-ok:      #06210E;
+  --c-sobre-info:    #04121C;
+
+ /* Velos - */
+  --c-velo:       #00000099;
+  --c-velo-denso: #000000B3;
+
+ /* Posiciones (los colores de chip de la app) */
+  --c-pos-1: #F4A340;   /* POR, naranja */
+  --c-pos-2: #B45FD1;   /* DEF, morado */
+  --c-pos-3: #3FA3E8;   /* CEN, azul */
+  --c-pos-4: #E3B23C;   /* DEL, dorado */
+  --c-pos-5: #2FBFA5;   /* ENT, verde agua */
+
+ /* Dificultad del rival, de 1 (fácil) a 5 (durísimo)
+     Escala propia y no los semánticos: aquí hay CINCO grados y `ok/warn/crit` son
+     tres. Cada par es fondo y texto, ya contrastados entre sí. */
+  --c-dif-1: #14532D; --c-dif-1-ink: #BBF7D0;
+  --c-dif-2: #3F6212; --c-dif-2-ink: #D9F99D;
+  --c-dif-3: #713F12; --c-dif-3-ink: #FDE68A;
+  --c-dif-4: #7C2D12; --c-dif-4-ink: #FED7AA;
+  --c-dif-5: #7F1D1D; --c-dif-5-ink: #FECACA;
+
+ /* Césped */
+  --c-grass:      #101019;
+  --c-grass-alt:  #16161F;
+  --c-chalk:      #FFFFFF1A;
+
+ /* Tipografía */
+  --f-ui: "Sofia Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-num: "Sofia Sans", system-ui, sans-serif;
+
+  --t-xs:   11px;
+  --t-sm:   13px;
+  --t-base: 15px;
+  --t-md:   17px;
+  --t-lg:   21px;
+  --t-xl:   27px;
+  --t-2xl:  34px;
+
+  --w-normal: 400;
+  --w-med:    600;
+  --w-bold:   700;
+  --w-black:  900;
+
+ /* Espaciado */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 44px;
+
+ /* Formas
+     La app oficial es CUADRADA: tarjetas, botones, chips y fichas, todo a escuadra,
+     así que los radios valen 0. `--r-full` existe porque ahí sí hay círculos: las
+     píldoras de jornada (J1/J2/J3), la moneda y los interruptores. */
+  --r-sm: 0; --r-md: 0; --r-lg: 0; --r-full: 999px;
+  --sombra: 0 6px 18px #00000059;
+
+ /* Medidas del armazón */
+  --h-header: 52px;
+  --h-nav:    62px;
+  /* Ancho de la nav cuando pasa a lateral (pantallas anchas o poco altas). 200px
+     caben el icono y la palabra sin truncar; en horizontal baja a 62 (solo icono). */
+  --w-nav:    200px;
+  --ancho-max: 1120px;
+
+ /* Movimiento */
+  --vel: 160ms;
+  --curva: cubic-bezier(.4, 0, .2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --vel: 0ms; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

@@ -1,0 +1,45 @@
+# Compose para quien prefiera Compose a `docker run`. Usa la imagen YA PUBLICADA, así que
+# no compila nada: es el mismo `docker pull` con otra cara.
+#
+# El `docker-compose.yml` de al lado sigue siendo el de desarrollo (cuatro servicios y
+# build local). Este es para instalar.
+#
+#     docker compose -f docker-compose.publicado.yml up -d
+#
+# La imagen la publica `.github/workflows/imagen.yml` en cada etiqueta `v*`.
+
+services:
+  coconut:
+    image: ghcr.io/jesus33lcc/laliga-fantasy-api:latest
+    container_name: coconut
+    restart: unless-stopped
+
+    # El volumen NO es opcional: aquí dentro vive la base de datos, y con ella la serie
+    # de precios, que no se puede reconstruir hacia atrás. La imagen se NIEGA a arrancar
+    # sin él a propósito.
+    volumes:
+      - coconut-datos:/data
+
+    ports:
+      # Por defecto solo escucha en localhost. Ponerlo en 0.0.0.0 expone a toda la red local
+      # una interfaz que ejecuta operaciones con dinero: para alcanzarla desde fuera, ata el
+      # puerto a la IP de tu VPN en vez de abrirlo.
+      - "127.0.0.1:8140:8000"
+
+    environment:
+      TZ: Europe/Madrid
+      # `agente`: vigila, ingiere y guarda la alineación, pero NO mueve dinero solo.
+      # `sombra` no toca nada (pruebas) · `real` ejecuta sin preguntar.
+      COCONUT_MODO: agente
+      # Un solo cliente hacia LaLiga, para que el límite de 0,5 req/s se cumpla de verdad.
+      COCONUT_WORKER_VIA_API: "1"
+      # Avisos por Telegram (opcional). Sin esto, todo queda en el log.
+      # COCONUT_TELEGRAM_TOKEN: ""
+      # COCONUT_TELEGRAM_CHAT: ""
+
+    # Sin `healthcheck` aquí: vale el de la imagen, que acepta 200 y 503. Con `curl -f`
+    # una instalación sin cuenta conectada queda `unhealthy` para siempre, porque /health
+    # da 503 hasta que se conecta.
+
+volumes:
+  coconut-datos:

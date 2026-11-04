@@ -1,0 +1,7 @@
+// Raíz: solo declara los plugins. Todo lo del módulo está en `app/build.gradle`.
+plugins {
+    id 'com.android.application' version '8.5.2' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.24' apply false
+    // Chaquopy empotra un CPython real en el APK. Licencia MIT.
+    id 'com.chaquo.python' version '17.0.0' apply false
+}

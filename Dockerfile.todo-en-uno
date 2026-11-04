@@ -1,0 +1,61 @@
+# LaLiga Fantasy Coconut: imagen ÚNICA con Postgres, API y worker en un contenedor.
+#
+# Instala Coconut sin montar un Compose de cuatro servicios ni un Postgres aparte. Las
+# órdenes de uso y las alternativas están en `docs/INSTALACION.md`.
+#
+# `/data` TIENE que ser un volumen y `arranque.sh` lo valida: Postgres vive dentro del
+# contenedor, así que sin volumen la base desaparece en el primer `docker rm`, y la serie
+# de precios no se reconstruye hacia atrás.
+#
+# Tres procesos en un contenedor, contra la norma y a propósito: el objetivo es que baste
+# un `docker pull`. La complejidad se paga una vez aquí en vez de exigírsela a cada
+# usuario. Quien sepa orquestar tiene el Compose de cuatro servicios.
+
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src \
+    TZ=Europe/Madrid \
+    PGDATA=/data/postgres \
+    POSTGRES_USER=coconut \
+    POSTGRES_DB=coconut \
+    COCONUT_TODO_EN_UNO=1
+
+# `postgresql` sin número de versión: en bookworm es la 15, y da igual cuál sea mientras el
+# `PGDATA` se cree con la misma. Fijar la versión aquí obligaría a fijarla también en la
+# migración de quien venga de otra imagen.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      build-essential libpq-dev curl tzdata postgresql postgresql-contrib gosu \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/ /app/src/
+COPY db/ /app/db/
+COPY web/ /app/web/
+COPY scripts/ /app/scripts/
+COPY docker/arranque.sh /arranque.sh
+RUN chmod +x /arranque.sh
+
+# NO se declara `VOLUME ["/data"]`, y es deliberado. Con `VOLUME`, Docker monta un volumen
+# ANÓNIMO cuando el usuario no indica ninguno: `/data` aparece siempre en /proc/mounts y la
+# guarda de `arranque.sh` no distingue un volumen del usuario de uno inventado por Docker.
+# Encima los datos parecen persistir, pero al recrear el contenedor Docker crea otro
+# anónimo y el anterior queda huérfano, con la serie de precios dentro y sin nombre por el
+# que encontrarlo. `docker run -v datos:/data` funciona igual sin declararlo.
+EXPOSE 8000
+
+# El healthcheck comprueba que la API RESPONDE, no que el sistema esté operativo: acepta
+# 200 y 503 a propósito. `curl -fsS /health` parece más riguroso y es un error, porque
+# `/health` da 503 en cuanto falta algo (sin precios, sin refresh token, un invariante en
+# rojo), o sea siempre en una instalación nueva. El contenedor quedaría `unhealthy` para
+# siempre y quien reinicie por healthcheck lo reiniciaría en bucle sin arreglar nada:
+# reiniciar no añade credenciales, solo tira la toma de precios en curso.
+#
+# El diagnóstico vive en `/health` y lo lee una persona o `deadman.sh`.
+HEALTHCHECK --interval=60s --timeout=10s --start-period=120s --retries=3 \
+  CMD curl -s -o /dev/null -w '%{http_code}' http://localhost:8000/health | grep -qE '^(200|503)$' || exit 1
+
+ENTRYPOINT ["/arranque.sh"]

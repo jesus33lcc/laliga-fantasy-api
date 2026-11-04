@@ -1,0 +1,73 @@
+# Comprobaciones que no necesitan credenciales ni base de datos.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  comprobar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: El Python compila
+        # `ast.parse` y no `compileall`: este escribe `.pyc` y falla por permisos.
+        run: |
+          python - <<'EOF'
+          import ast, pathlib, sys
+          malos = []
+          for f in list(pathlib.Path('src').rglob('*.py')) + list(pathlib.Path('scripts').rglob('*.py')):
+              try:
+                  ast.parse(f.read_text(encoding='utf-8'), filename=str(f))
+              except SyntaxError as e:
+                  malos.append(f"{f}:{e.lineno}: {e.msg}")
+          for m in malos:
+              print(f"::error::{m}")
+          print(f"{len(malos)} ficheros con errores de sintaxis")
+          sys.exit(1 if malos else 0)
+          EOF
+
+      - name: Estilo y errores estáticos
+        # La misma versión que la cadena de verificación local. Con otra, cambia el juego
+        # de reglas: la 0.8.4 exige `UP038`, que la 0.17 ya no tiene.
+        run: |
+          pip install ruff==0.17.3
+          ruff check src scripts
+
+      - name: Todo el SQL compila contra SQLite
+        # `--esquema` crea las tablas en memoria: SQLite las resuelve antes que las
+        # funciones, así que sin ellas una función inexistente no llega a verse.
+        run: |
+          pip install -r requirements.txt
+          python scripts/auditar_sql_sqlite.py --esquema --ci
+
+      - name: El paquete web se construye
+        # Aborta ante colisiones de nombres, imports que faltan y JS que no parsea.
+        run: python3 scripts/build_web.py
+
+      - name: Las pestañas renderizan y ningún botón está muerto
+        run: node scripts/probar_web.mjs
+
+      - name: La documentación de la API está al día
+        # `--local` construye la app y le pide su OpenAPI, sin servidor ni base de datos.
+        run: |
+          python scripts/generar_docs_api.py --local > /tmp/API.md
+          if ! diff -u docs/API.md /tmp/API.md; then
+            echo "::error::docs/API.md no coincide con las rutas actuales."
+            echo "::error::Regenérala: python scripts/generar_docs_api.py --local > docs/API.md"
+            exit 1
+          fi

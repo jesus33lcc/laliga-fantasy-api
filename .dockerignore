@@ -1,0 +1,28 @@
+# Lo que NO tiene que entrar en la imagen.
+
+# Secretos y datos de una instalación concreta
+datos/
+.env
+.env.*
+!.env.example
+decisions/
+logs/
+cache/
+prompts/
+data/
+web/dist/              # la maqueta privada lleva plantillas y saldos dentro
+
+# Historia y herramientas, que no se ejecutan dentro
+.git
+.github
+.gitignore
+android/               # el APK se compila en Actions, no en la imagen
+docs/
+scripts/fixtures/
+
+# Generado
+__pycache__/
+*.pyc
+.pytest_cache/
+*.log
+node_modules/

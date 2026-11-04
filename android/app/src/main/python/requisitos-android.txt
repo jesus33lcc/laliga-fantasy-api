@@ -1,0 +1,33 @@
+# Dependencias de Coconut para correr DENTRO del móvil (Chaquopy).
+#
+# Se aparta de `requirements.txt` en tres cosas, y las tres son por código nativo:
+#
+#   1. pydantic 1.x y no 2.x. Pydantic 2 delega en `pydantic-core`, escrito en RUST, que no
+#      existe para Android ni se puede compilar aquí. Pydantic 1.10 tiene rueda universal y
+#      FastAPI 0.115 lo soporta.
+#   2. uvicorn SIN `[standard]`. Ese extra arrastra cinco paquetes con extensiones en C y
+#      ninguno hace falta: uvicorn cae a `asyncio` y `h11`, que son Python puro.
+#   3. Sin `asyncpg`. Solo sirve para Postgres; en el móvil la base es SQLite.
+#
+# Lo único nativo que queda es `greenlet`, que exige SQLAlchemy en modo async y que Chaquopy
+# sí trae compilado para Android.
+
+fastapi==0.115.6
+uvicorn==0.34.0
+
+# `[http2]` hace falta: `ClienteEducado` pasa `http2=True` y sin `h2` la aplicación no
+# llega a arrancar (`ImportError: Using http2=True, but the 'h2' package is not
+# installed`). Desde fuera solo se ve «la API no llegó a escuchar», que no apunta aquí.
+# No es una dependencia nativa: `h2` es Python puro.
+httpx[http2]==0.28.1
+
+# Android no trae base de datos de zonas horarias, y el scheduler pide `Europe/Madrid`.
+# Sin esto, `ModuleNotFoundError: No module named 'tzdata'` y el scheduler no arranca; la
+# API sí, porque ese fallo está tolerado, pero no se ingiere nada. También es Python puro.
+tzdata==2026.2
+pydantic==1.10.19
+sqlalchemy==2.0.36
+aiosqlite==0.20.0
+apscheduler==3.11.0
+PyJWT==2.10.1
+python-dotenv==1.0.1

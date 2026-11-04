@@ -1,0 +1,160 @@
+/* ============================================================================
+   pitch.css: el campo y la ficha de jugador sobre él.
+   Copia la ficha de la app: foto recortada, esquina triangular con la
+   puntuación y etiqueta blanca con el nombre y su estado.
+   ========================================================================== */
+
+.campo {
+  position: relative;
+  background:
+    linear-gradient(180deg, var(--c-grass) 0%, var(--c-grass-alt) 50%, var(--c-grass) 100%);
+  border: 1px solid var(--c-line);
+  padding: var(--s-5) var(--s-3);
+  display: flex; flex-direction: column; justify-content: space-around;
+  gap: var(--s-5);
+  min-height: 420px;
+  overflow: hidden;
+}
+
+/* Líneas: áreas arriba y abajo, y el círculo central. Todo con ::before/::after
+   sobre dos capas para no meter SVG. */
+.campo__lineas { position: absolute; inset: 0; pointer-events: none; }
+.campo__lineas::before,
+.campo__lineas::after {
+  content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 46%; height: 66px; border: 1px solid var(--c-chalk);
+}
+.campo__lineas::before { top: -1px; border-top: 0; }
+.campo__lineas::after  { bottom: -1px; border-bottom: 0; }
+
+.campo__centro {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 108px; height: 108px; border: 1px solid var(--c-chalk); border-radius: 50%;
+}
+.campo__centro::before {
+  content: ""; position: absolute; top: 50%; left: -50vw; right: -50vw;
+  border-top: 1px solid var(--c-chalk);
+}
+
+/* Rejilla, no flex: con columnas `minmax(0, 78px)` las fichas se encogen juntas y
+   la línea aguanta. Con `flex` y ancho fijo, cinco fichas desbordan por debajo de
+   380 px y la línea se parte, deshaciendo el dibujo de la formación. */
+.campo__linea {
+  position: relative; z-index: 1;
+  display: grid; grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 78px);
+  justify-content: center; gap: var(--s-2);
+}
+
+/* Ficha */
+
+.ficha { width: 100%; min-width: 0; position: relative; }
+
+.ficha__foto {
+  position: relative;
+  aspect-ratio: 1; width: 100%;
+  background: var(--c-surface-2);
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  overflow: hidden;
+}
+.ficha__foto img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+
+/* La esquina triangular con los puntos de la jornada */
+.ficha__puntos {
+  position: absolute; top: 0; left: 0;
+  width: 30px; height: 30px;
+  display: flex; align-items: flex-start; justify-content: flex-start;
+  padding: 1px 0 0 3px;
+  font-size: var(--t-xs); font-weight: var(--w-black); color: var(--c-sobre-claro);
+  font-variant-numeric: tabular-nums;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  background: var(--c-gold);
+}
+.ficha__puntos--alta { background: var(--c-ok); }
+.ficha__puntos--baja { background: var(--c-crit); color: var(--c-ink); }
+
+/* Pendiente de jugar. Gris apagado a propósito: es AUSENCIA de dato, no un resultado.
+   Con el dorado de los puntos parecería que ya ha puntuado algo. */
+.ficha__puntos--pend { background: var(--c-ink-3); color: var(--c-ink); }
+
+.ficha__nombre {
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+  background: var(--c-ink); color: var(--c-sobre-claro);
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  padding: 3px var(--s-1);
+  font-size: var(--t-xs); font-weight: var(--w-bold);
+}
+.ficha__nombre span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ficha__estado { width: 12px; height: 12px; flex: none; }
+
+/* Hueco vacío del once: lo que anula la jornada entera */
+.ficha--hueco .ficha__foto {
+  border: 2px dashed var(--c-crit);
+  display: grid; place-items: center;
+  background: var(--c-accent-suave);
+}
+.ficha--hueco .ficha__nombre { background: var(--c-crit); color: var(--c-ink); }
+
+/* Edición
+   Se toca, no se arrastra: arrastrar en el móvil pelea con el desplazamiento de
+   la página y acaba moviendo la pantalla en vez de la ficha. */
+
+.ficha--elegible {
+  border: 0; padding: 0; background: none; font: inherit; color: inherit;
+  cursor: pointer; text-align: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--vel) var(--curva);
+}
+.ficha--elegible:hover { transform: translateY(-2px); }
+.ficha--elegible:focus-visible { outline: 2px solid var(--c-info); outline-offset: 3px; }
+
+.ficha--elegida .ficha__foto { box-shadow: 0 0 0 3px var(--c-gold); }
+.ficha--elegida .ficha__nombre { background: var(--c-gold); }
+.ficha--elegida { transform: translateY(-3px); }
+
+.ficha__marca {
+  position: absolute; inset: auto 0 0 0;
+  background: var(--c-accent-fuerte); color: var(--c-ink);
+  font-size: 9px; font-weight: var(--w-bold); text-align: center;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+
+.controles { display: flex; flex-direction: column; gap: var(--s-2); }
+.formaciones { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.formacion {
+  padding: var(--s-2) var(--s-3); min-height: 38px;
+  border: 1px solid var(--c-line); border-radius: var(--r-sm);
+  background: var(--c-surface-2); color: var(--c-ink-2);
+  font-size: var(--t-sm); font-weight: var(--w-bold); font-variant-numeric: tabular-nums;
+}
+.formacion:hover:not([disabled]) { color: var(--c-ink); border-color: var(--c-ink-3); }
+.formacion[aria-pressed="true"] { background: var(--c-accent); border-color: transparent; color: var(--c-on-accent); }
+.formacion[disabled] { opacity: .3; cursor: not-allowed; }
+
+/* Banquillo en edición: por posición, para ver de un vistazo con quién se puede
+   cambiar cada uno (solo se intercambian iguales). */
+.banco { display: flex; flex-direction: column; gap: var(--s-3); }
+.banco__grupo { display: flex; flex-direction: column; gap: var(--s-2); }
+.banco__fichas {
+  display: grid; gap: var(--s-2);
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+}
+.banquillo__aviso { padding: var(--s-4); text-align: center; font-size: var(--t-sm); }
+
+/* Guardado */
+
+.guardado {
+  border-left: 3px solid var(--c-accent);
+  padding-left: var(--s-3);
+  font-size: var(--t-sm);
+}
+.guardado__cuando { color: var(--c-ink-2); }
+
+@media (max-width: 420px) {
+  .campo { padding: var(--s-4) var(--s-2); gap: var(--s-4); min-height: 360px; }
+  .campo__linea { gap: 5px; }
+  .ficha__nombre { font-size: 10px; padding: 2px; }
+  .ficha__puntos { width: 26px; height: 26px; font-size: 10px; }
+  .banquillo { gap: var(--s-2); padding: var(--s-3); }
+}

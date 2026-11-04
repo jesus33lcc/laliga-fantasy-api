@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono adaptativo (Android 8+). El sistema recorta el primer plano a la forma que
+     elija el launcher, así que el coco lleva margen de sobra. El fondo es `@color/fondo`,
+     el mismo de la web, y no el negro del logo oficial: los dos son casi negros, pero
+     mezclarlos deja una costura visible entre el icono y la pantalla de arranque. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/fondo" />
+    <foreground android:drawable="@drawable/ic_frente" />
+    <monochrome android:drawable="@drawable/ic_frente" />
+</adaptive-icon>

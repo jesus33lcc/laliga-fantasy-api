@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Espejo de `web/css/tokens.css`: si allí cambian, aquí también, o el arranque
+         nativo y la web enseñan colores distintos en la misma pantalla. -->
+    <color name="fondo">#0A0A13</color>
+    <color name="texto">#E8E8F0</color>
+</resources>

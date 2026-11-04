@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android bloquea el tráfico en claro desde API 28. Coconut se sirve por HTTP dentro de una
+  VPN privada, así que hay que permitirlo.
+
+  OJO: se permite para CUALQUIER host a propósito: la dirección del servidor la escribe cada
+  usuario en el primer arranque (IP de VPN, hostname local, lo que sea), así que no se puede
+  declarar aquí una lista fija. El riesgo queda acotado por dónde vive la app: una red
+  privada y una API que además exige su propio login.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

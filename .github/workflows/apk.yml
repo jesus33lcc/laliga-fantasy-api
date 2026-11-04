@@ -1,0 +1,145 @@
+# Compila el APK y lo publica en Releases al etiquetar vX.Y.Z.
+name: APK
+
+on:
+  push:
+    tags: ['v*']            # una release por etiqueta
+    branches: [main]        # build de comprobación al tocar android/ o este fichero
+    paths:
+      - 'android/**'
+      - '.github/workflows/apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write           # crear la Release
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # Chaquopy instala los requisitos con un Python de la misma versión que el que
+      # empotra, y sin él falla con "Couldn't find Python 3.12".
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Su lista por defecto lleva `tools`, que ya no existe en el SDK y hace fallar
+      # a sdkmanager. La plataforma y las build-tools las baja Gradle.
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
+
+      # Sin wrapper en el repo: la acción instala y cachea Gradle.
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Un XML mal formado se ve en segundos, no tras varios minutos de Gradle.
+      - name: Validar los XML
+        run: |
+          python3 - <<'EOF'
+          import glob, sys, xml.etree.ElementTree as ET
+          ficheros = glob.glob('android/**/*.xml', recursive=True)
+          mal = 0
+          for f in ficheros:
+              try: ET.parse(f)
+              except Exception as e: print(f'::error file={f}::{e}'); mal += 1
+          print(f'{len(ficheros)} XML revisados')
+          sys.exit(1 if mal else 0)
+          EOF
+
+      - name: Compilar
+        working-directory: android
+        run: gradle assembleRelease --no-daemon
+
+      # Un APK corrupto falla al instalar sin decir por qué, así que se para aquí, antes
+      # de la Release.
+      - name: Comprobar el APK
+        working-directory: android
+        run: |
+          APK=$(find . -name '*-release*.apk' | head -1)
+          [ -n "$APK" ] || { echo "no se generó ningún APK"; exit 1; }
+          TAM=$(stat -c%s "$APK")
+          echo "APK: $APK ($((TAM/1024)) KB)"
+          # Lleva el intérprete de Python dentro: por debajo de esto le faltan bibliotecas.
+          [ "$TAM" -gt 20000000 ] || {
+            echo "solo $((TAM/1024)) KB: se esperan ~32 MB con Python dentro."
+            echo "probablemente faltan las bibliotecas nativas o el intérprete."
+            exit 1
+          }
+          # Las build-tools las pone el SDK del runner o Gradle, con la versión que toque:
+          # fijar un número aquí caduca.
+          AAPT=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt 2>/dev/null | sort -V | tail -1)
+          [ -n "$AAPT" ] || { echo "no encuentro aapt en $ANDROID_HOME/build-tools"; exit 1; }
+          "$AAPT" dump badging "$APK" | head -3
+          echo "APK_PATH=$PWD/${APK#./}" >> "$GITHUB_ENV"
+
+      - name: Renombrar con la versión
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          [ "$GITHUB_REF_TYPE" = tag ] || V="main-${GITHUB_SHA::7}"
+          cp "$APK_PATH" "coconut-$V.apk"
+          echo "APK_FINAL=coconut-$V.apk" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APK_FINAL }}
+          path: ${{ env.APK_FINAL }}
+
+      # Solo las etiquetas crean Release; un push a main deja el artefacto para probar.
+      - name: Publicar en Releases
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.APK_FINAL }}
+          name: Coconut ${{ github.ref_name }}
+          body: |
+            ## LaLiga Fantasy Coconut ${{ github.ref_name }}
+
+            Cada versión se publica de **dos formas**, con lo mismo dentro.
+
+            ### 🖥️ Servidor, con Docker
+
+            ```bash
+            docker volume create coconut-datos
+            docker run -d --name coconut -p 8140:8000 -v coconut-datos:/data \
+              ghcr.io/${{ github.repository_owner }}/laliga-fantasy-api:${{ github.ref_name }}
+            ```
+
+            Abre `http://localhost:8140/app/`. La imagen se construye **en paralelo a esta
+            release**, así que si acaba de publicarse puede tardar unos minutos en aparecer.
+
+            ### 📱 Android, el `.apk` de aquí abajo
+
+            Descárgalo, ábrelo en el móvil y permite la instalación de orígenes
+            desconocidos cuando lo pida.
+
+            ### Funciona de dos formas, y la elige sola
+
+            | | cuándo | qué hace |
+            |---|---|---|
+            | **Sola** | por defecto | Coconut corre dentro del móvil: Python, la API y una base SQLite local. No hace falta servidor |
+            | **Con servidor** | si le das una URL | apunta a tu instalación de siempre. Conecta la VPN antes si la tienes tras una |
+
+            La primera vez tarda unos segundos en arrancar: extrae la interfaz y levanta la
+            API. Después es inmediato.
+
+            ### Lo que añade sobre abrir la web
+
+            Captura el redirect del login de LaLiga (`authredirect://…`), que ningún
+            navegador sabe abrir. En web hay que copiar y pegar un código a mano; aquí no.
+
+            ### Lo que el modo sin servidor no puede darte
+
+            Android no garantiza ejecutar nada a una hora concreta: Doze, App Standby y las
+            capas de Xiaomi, Samsung o Huawei matan los procesos en segundo plano. Los
+            trabajos que dependen del reloj (guardar la alineación antes de que se congele,
+            vigilar clausulazos, resolver una puja a su hora) solo son fiables con un
+            servidor detrás.
+
+            Sin servidor tienes la herramienta completa; con servidor, además, el piloto.
