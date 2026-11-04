@@ -622,6 +622,15 @@ async def job_recompensa() -> None:
     from ..clients.via_api import accion as accion_api
     from ..clients.via_api import activo as via_api
 
+    # Sin cuenta conectada `/accion` responde 503, se toma por la API caída, y la vía
+    # directa acaba en `SinCredenciales` registrada como error. En una instalación nueva
+    # es lo normal, así que se registra como INFO.
+    try:
+        await tokens.bearer()
+    except SinCredenciales as e:
+        log.info("recompensa diaria: sin cuenta conectada, no se cobra (%s)", e)
+        return
+
     # Por `/accion/recompensa`, para que el cobro use el token bucket compartido y entre
     # en el contador de peticiones. El respaldo al cliente propio se queda: dejar de
     # cobrar 100.000 €/día por un reinicio de la API sería peor que la petición suelta

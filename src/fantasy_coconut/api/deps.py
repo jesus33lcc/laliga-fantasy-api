@@ -39,6 +39,14 @@ async def ciclo_vida(app):
     _cliente = ClienteEducado()
     await _cliente.__aenter__()
     log.info("cliente HTTP compartido abierto")
+    # Las tablas, antes que nada que las lea: en una base nueva la identidad consulta
+    # `ajustes` y Postgres registra "relation does not exist" si aún no está creada.
+    try:
+        from ..db import asegurar_tablas
+        await asegurar_tablas()
+    except Exception:
+        log.exception("no se pudieron crear las tablas: el login, los ajustes y los "
+                      "candados no funcionarán")
     # Las tareas programadas viven en Postgres: al arrancar se reprograman las pendientes
     # y se marcan como perdidas las que vencieron con el proceso caído.
     try:
@@ -57,18 +65,6 @@ async def ciclo_vida(app):
     except Exception:
         log.exception("no se pudo cargar la identidad (liga/equipo)")
 
-    try:
-        from .sesion import crear_tablas
-        await crear_tablas()
-        from ..ajustes import crear_tabla
-        await crear_tabla()
-        from .bloqueo import crear_tabla as crear_bloqueos
-        await crear_bloqueos()
-        from ..models.trading import crear_tabla as crear_trading
-        await crear_trading()
-    except Exception:
-        log.exception("no se pudieron crear las tablas de sesión, ajustes, bloqueo o "
-                      "trading: el login y los candados no funcionarán")
     try:
         yield
     finally:
