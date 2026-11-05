@@ -17,7 +17,9 @@ cero (tipo 7).
 
 Qué hace
 
-Compara el once que está guardado en la API con la plantilla real. Si falta alguien:
+Compara el once que está guardado en la API con la plantilla real. Si falta alguien, o
+si un titular está en una línea que ya no es la suya porque LaLiga le cambió la
+demarcación:
 
 1. Sustituye solo el hueco, con el mejor suplente de esa misma posición. La decisión
    humana sobre los otros diez se respeta: es lo que la distingue de un recálculo.
@@ -136,8 +138,12 @@ async def _refrescar_candado(payload: dict) -> None:
     log.warning("candado refrescado: protege los 11 del once reparado")
 
 
-async def _mios_ahora() -> set[str] | None:
-    """Los `playerTeamId` que son míos ahora mismo, según la API.
+async def _mios_ahora() -> dict[str, int | None] | None:
+    """Los `playerTeamId` que son míos ahora mismo, con su posición, según la API.
+
+    La posición viene de la misma lectura y sin caché: el maestro público va hasta 8 h por
+    detrás, y un titular al que LaLiga cambia de demarcación sigue en su línea vieja del
+    once hasta que algo refresca la alineación y lo descarta.
 
     Por qué no vale `mi_plantilla()` para esto
 
@@ -160,8 +166,13 @@ async def _mios_ahora() -> set[str] | None:
             datos = await FantasyAPI(http).plantilla(
                 await _bearer(), settings.fantasy_league_id,
                 str(settings.fantasy_team_id), ttl=0)
-        return {str(j.get("playerTeamId")) for j in (datos.get("players") or [])
-                if j.get("playerTeamId")}
+        out: dict[str, int | None] = {}
+        for j in datos.get("players") or []:
+            if not j.get("playerTeamId"):
+                continue
+            pos = (j.get("playerMaster") or {}).get("positionId")
+            out[str(j["playerTeamId"])] = int(pos) if pos not in (None, "") else None
+        return out
     except Exception as e:
         log.warning("guardia: no se pudo leer la plantilla en vivo (%s); "
                     "se compara contra la base", type(e).__name__)
@@ -181,16 +192,31 @@ async def revisar(*, reparar: bool = True, motivo: str = "revisión") -> dict:
         return {"ok": True, "sin_once": True}
 
     plantilla = await mi_plantilla()
-    mios = {j.player_team_id: j for j in plantilla if j.player_team_id}
     puestos = _ids(actual)
 
-    # La propiedad se pregunta a la API; los puntos esperados salen de la base. Son
-    # dos cosas distintas y solo una envejece mal.
+    # La propiedad y la posición se preguntan a la API; los puntos esperados salen de la
+    # base. Son cosas distintas y solo las dos primeras envejecen mal.
     en_vivo = await _mios_ahora()
-    propios = en_vivo if en_vivo is not None else set(mios)
+    if en_vivo is not None:
+        # Con la posición de la base, el recambio y el recálculo colocarían al jugador
+        # cambiado en su línea vieja y el once reparado saldría igual de roto.
+        for j in plantilla:
+            pos = en_vivo.get(j.player_team_id or "")
+            if pos is not None and pos != j.posicion:
+                j.posicion = pos
+    mios = {j.player_team_id: j for j in plantilla if j.player_team_id}
+    propios = set(en_vivo) if en_vivo is not None else set(mios)
 
-    huecos = [(linea, pid) for linea in LINEAS
-              for pid in puestos[linea] if pid not in propios]
+    # Dos clases de hueco: el titular que ya no es tuyo, y el que sigue siéndolo pero está
+    # en una línea que ya no es la suya. LaLiga descarta a los dos al refrescar el once.
+    huecos, descolocados = [], []
+    for linea in LINEAS:
+        for pid in puestos[linea]:
+            if pid not in propios:
+                huecos.append((linea, pid))
+            elif pid in mios and mios[pid].posicion != POS_DE_LINEA[linea]:
+                huecos.append((linea, pid))
+                descolocados.append(mios[pid].nombre)
     titulares = sum(len(v) for v in puestos.values())
 
     if not huecos and titulares == 11:
@@ -208,7 +234,8 @@ async def revisar(*, reparar: bool = True, motivo: str = "revisión") -> dict:
                 "reparado": False}
 
     # ---------- 1) sustituir hueco por hueco, conservando el resto de la decisión ----------
-    en_once = {p for v in puestos.values() for p in v}
+    # Sin los huecos: un descolocado puede cubrir el de su línea nueva.
+    en_once = {p for v in puestos.values() for p in v} - {pid for _, pid in huecos}
     nuevo = {k: list(v) for k, v in puestos.items()}
     sustituciones, sin_recambio, refuerzos = [], [], []
 
@@ -255,6 +282,10 @@ async def revisar(*, reparar: bool = True, motivo: str = "revisión") -> dict:
         nuevo = a_payload(once)
         recalculado = True
     else:
+        # `_ids()` deja el portero como lista de uno, y el PUT lo exige suelto.
+        # `/accion/alineacion` lo rechaza con 409 (la lista no casa con ningún
+        # `playerTeamId`) y por la vía directa LaLiga responde 500.
+        nuevo["goalkeeper"] = nuevo["goalkeeper"][0] if nuevo["goalkeeper"] else None
         nuevo["tactical_formation"] = actual.get("tactical_formation") or [
             len(nuevo["defender"]), len(nuevo["midfield"]), len(nuevo["striker"])]
 
@@ -281,8 +312,11 @@ async def revisar(*, reparar: bool = True, motivo: str = "revisión") -> dict:
                if sustituciones else "once recalculado entero")
     await enviar(
         "🚨 <b>Once reparado automáticamente</b>\n"  # sin-rastro-ok: va a Telegram
-        f"Faltaban {len(huecos)} titular(es): te los han quitado o se vendieron.\n"
-        f"{detalle}\n"
+        + (f"Faltaban {len(huecos) - len(descolocados)} titular(es): te los han quitado "
+           "o se vendieron.\n" if len(huecos) > len(descolocados) else "")
+        + (f"Cambio de demarcación, recolocado: {', '.join(descolocados)}.\n"
+           if descolocados else "")
+        + f"{detalle}\n"
         + ("Se cambió la formación porque no había recambio en su puesto.\n"
            if recalculado else "")
         + ("El candado sigue puesto, con la lista puesta al día." if recalculado

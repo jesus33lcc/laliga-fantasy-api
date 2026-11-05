@@ -14,6 +14,7 @@ import datetime as dt
 import logging
 import random
 
+import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
@@ -177,14 +178,15 @@ async def job_radar() -> None:
 
 async def _guardar_once(payload: dict, *, reparacion: bool = False) -> dict:
     """Manda el once por `/accion/alineacion`, que además de escribir comprueba que sean
-    11 y que todos sigan en plantilla. El camino directo no tiene esa guarda.
+    11, que todos sigan en plantilla y que cada uno vaya en su línea. El camino directo no
+    tiene esas guardas.
 
-    Si la API no responde se cae al cliente propio, porque no alinear son 0 puntos. Es el
-    punto por el que pasan las dos vías: `guardia_once` también entra por aquí.
+    Si la API no responde se cae al cliente propio, porque no alinear son 0 puntos. Un 4xx
+    no cae: es la API rechazando el once, y se propaga. Es el punto por el que pasan las
+    dos vías: `guardia_once` también entra por aquí.
 
     `reparacion=True` pide saltarse el candado por la vía buena. Sin él, la guardia se
-    lleva un 423, el `except` de abajo no lo distingue de una caída de la API y cae al
-    cliente directo, que escribe sin las comprobaciones de `/accion/alineacion`.
+    lleva un 423.
     """
     from ..clients.acciones import Acciones
     from ..clients.via_api import accion as accion_api
@@ -193,6 +195,14 @@ async def _guardar_once(payload: dict, *, reparacion: bool = False) -> dict:
         try:
             return await accion_api("alineacion", payload,
                                     params={"respetar_candado": "false"} if reparacion else None)
+        except httpx.HTTPStatusError as e:
+            # Un 4xx es la API diciendo que el once está mal (no son 11, alguien ya no es
+            # tuyo, alguien está fuera de su línea). El camino directo no comprueba nada
+            # de eso y lo mandaría igual.
+            if 400 <= e.response.status_code < 500:
+                raise
+            log.warning("no se pudo alinear por /accion (%s); se hace directo",
+                        e.response.status_code)
         except Exception as e:
             log.warning("no se pudo alinear por /accion (%s); se hace directo",
                         type(e).__name__)
@@ -276,6 +286,7 @@ async def job_alineacion() -> None:
     # cerrado, el bot no recalcula por encima.
     if await candado("once"):
         log.info("once BLOQUEADO: el cron no recalcula")
+        await _revisar_once_guardado("tras el cron, con candado")
         return
     from ..once_fijado import leer as leer_fijado
     from ..politica import SOMBRA, modo
@@ -370,6 +381,25 @@ async def job_alineacion() -> None:
                      clave=f"once:{d}{m}{dl}:{int(once.total)}", silencio=6 * 3600, categoria="alineacion")
     except Exception:
         log.exception("alineacion fallo")
+    await _revisar_once_guardado("tras el cron")
+
+
+async def _revisar_once_guardado(motivo: str) -> None:
+    """Pasa la guardia sobre el once que ha quedado guardado.
+
+    El once fijado y `mejor_once()` colocan a cada jugador con la posición de la base, y
+    tras un cambio de demarcación la base va hasta un ciclo de `league` por detrás. Si
+    `/accion/alineacion` rechaza ese once, o el candado impide recalcular, la guardia lo
+    recoloca con la posición en vivo. La pasada de 12 min antes de abrir es la última antes
+    de la congelación.
+    """
+    try:
+        from ..guardia_once import revisar as revisar_once
+        r = await revisar_once(motivo=motivo)
+        if r.get("reparado"):
+            log.warning("once reparado %s: %s", motivo, r.get("sustituciones"))
+    except Exception:
+        log.exception("no se pudo revisar el once %s", motivo)
 
 
 async def job_alineacion_guardia() -> None:

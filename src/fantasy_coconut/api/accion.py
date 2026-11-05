@@ -647,8 +647,9 @@ async def alineacion(payload: dict | None = Body(None), auto: bool = Query(False
                      respetar_candado: bool = Query(True)):
     """Con `?auto=true` calcula el mejor once; si no, guarda el `payload` recibido.
 
-    Valida que sean 11 y que todos sigan en plantilla antes de enviar. Un once de 10
-    anula la jornada entera, así que aquí no se manda nada sin comprobarlo.
+    Valida que sean 11, que todos sigan en plantilla y que cada uno vaya en su línea
+    antes de enviar. Un once de 10 anula la jornada entera, así que aquí no se manda nada
+    sin comprobarlo.
 
     `respetar_candado=false` lo usa solo `guardia_once`. Una reparación no es un
     recálculo: el criterio humano que echó el candado ya no se puede cumplir si el
@@ -689,6 +690,22 @@ async def alineacion(payload: dict | None = Body(None), auto: bool = Query(False
     fuera = [p for p in pedidos if p not in mios]
     if fuera:
         raise HTTPException(409, f"esos playerTeamId ya no son tuyos: {fuera}")
+    # Tras un cambio de demarcación, LaLiga descarta en silencio a quien va en su línea
+    # vieja y el once se queda en diez. La posición se lee de la misma plantilla fresca.
+    pos = {str(p.get("playerTeamId")): (p.get("playerMaster") or {}).get("positionId")
+           for p in plantilla.get("players", [])}
+    nombre = {str(p.get("playerTeamId")): (p.get("playerMaster") or {}).get("nickname")
+              for p in plantilla.get("players", [])}
+    lineas = {"goalkeeper": 1, "defender": 2, "midfield": 3, "striker": 4}
+    descolocados = []
+    for k, esperada in lineas.items():
+        v = payload.get(k) or []
+        for x in (v if isinstance(v, list) else [v]):
+            real = pos.get(str(x))
+            if real not in (None, "") and int(real) != esperada:
+                descolocados.append(nombre.get(str(x)) or str(x))
+    if descolocados:
+        raise HTTPException(409, f"fuera de su línea (cambio de demarcación): {descolocados}")
 
     if dry:
         return {"dry_run": True, "payload": payload, "num_jugadores": n}

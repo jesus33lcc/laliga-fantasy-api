@@ -235,12 +235,13 @@ async def _guardar_plantillas(api: FantasyAPI, token: str, liga: str,
 
 
 async def _avisar_cambios_de_posicion(cambios: list[tuple]) -> None:
-    """Un cambio de demarcación en la plantilla PROPIA se avisa como emergencia.
+    """Un cambio de demarcación en la plantilla PROPIA se avisa, y la guardia lo intenta
+    reparar en el acto.
 
     El once guardado tiene al jugador en su línea vieja, así que en cuanto algo refresque
     la alineación (un fichaje basta) LaLiga lo descarta y quedan diez, y eso anula la
-    jornada. Solo se arregla recolocándolo a mano. Los de otros managers no se avisan: son
-    información, no una tarea.
+    jornada. `guardia_once` lo detecta y lo recoloca; aquí se le llama sin esperar a su
+    pasada horaria. Los de otros managers no se avisan: son información, no una tarea.
     """
     if not cambios:
         return
@@ -258,15 +259,26 @@ async def _avisar_cambios_de_posicion(cambios: list[tuple]) -> None:
                      nivel=EMERGENCIA, categoria="once_roto", clave="posicion:sin-is-me")
         return
     propios = [c for c in cambios if c[0] == mio]
-    for _, nombre, viejo, nuevo in propios:
-        await enviar(f"🔀 <b>{nombre} cambia de demarcación</b>: {viejo} → {nuevo}\n"  # sin-rastro-ok: aviso que lee una persona
-                     f"Hay que recolocarlo en el once a mano: LaLiga lo descarta de su "
-                     f"línea vieja y un once de diez anula la jornada.",
-                     nivel=EMERGENCIA, categoria="once_roto",
-                     clave=f"posicion:{nombre}:{nuevo}")
     if propios:
         log.error("cambio de demarcación PROPIO: %s",
                   ", ".join(f"{n} {v}->{x}" for _, n, v, x in propios))
+        try:
+            from ..guardia_once import revisar as revisar_once
+            r = await revisar_once(motivo="cambio de demarcación")
+        except Exception:
+            log.exception("no se pudo revisar el once tras el cambio de demarcación")
+            r = {"ok": False}
+    for _, nombre, viejo, nuevo in propios:
+        if r.get("ok"):
+            # Si era titular, la guardia ya ha mandado su propio aviso de once reparado.
+            pie = "El once está revisado: si era titular, se ha recolocado."
+        else:
+            pie = ("La guardia del once no ha podido arreglarlo: hay que recolocarlo a "
+                   "mano, o LaLiga lo descarta de su línea vieja y quedan diez.")
+        await enviar(f"🔀 <b>{nombre} cambia de demarcación</b>: {viejo} → {nuevo}\n"  # sin-rastro-ok: aviso que lee una persona
+                     + pie,
+                     nivel=EMERGENCIA, categoria="once_roto",
+                     clave=f"posicion:{nombre}:{nuevo}")
     ajenos = [c for c in cambios if c[0] != mio]
     if ajenos:
         log.info("cambios de demarcación ajenos: %s",

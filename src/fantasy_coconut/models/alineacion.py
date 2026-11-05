@@ -372,4 +372,11 @@ def valido(once: Once) -> tuple[bool, str]:
         return False, "los bloques no cuadran con la formación"
     if not once.portero:
         return False, "sin portero"
+    # LaLiga descarta en silencio a quien va en una línea que no es la suya, y el once
+    # queda en diez.
+    fuera = [j.nombre for pos, bloque in ((1, [once.portero]), (2, once.defensas),
+                                          (3, once.medios), (4, once.delanteros))
+             for j in bloque if j.posicion != pos]
+    if fuera:
+        return False, f"fuera de su línea: {', '.join(fuera)}"
     return True, "ok"
